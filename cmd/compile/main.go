@@ -5,15 +5,10 @@
 package main
 
 import (
-	"github.com/glycerine/golang-repl/cmd/compile/avail/amd64"
-	"github.com/glycerine/golang-repl/cmd/compile/avail/arm"
-	"github.com/glycerine/golang-repl/cmd/compile/avail/arm64"
-	"github.com/glycerine/golang-repl/cmd/compile/avail/mips64"
-	"github.com/glycerine/golang-repl/cmd/compile/avail/ppc64"
-	"github.com/glycerine/golang-repl/cmd/compile/avail/s390x"
-	"github.com/glycerine/golang-repl/cmd/compile/avail/x86"
-	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"fmt"
+	"github.com/glycerine/golang-repl/cmd/avail/obj"
+	"github.com/glycerine/golang-repl/cmd/compile/avail/amd64"
+	"github.com/glycerine/golang-repl/cmd/compile/avail/x86"
 	"log"
 	"os"
 )
@@ -31,15 +26,5 @@ func main() {
 		x86.Main()
 	case "amd64", "amd64p32":
 		amd64.Main()
-	case "arm":
-		arm.Main()
-	case "arm64":
-		arm64.Main()
-	case "mips64", "mips64le":
-		mips64.Main()
-	case "ppc64", "ppc64le":
-		ppc64.Main()
-	case "s390x":
-		s390x.Main()
 	}
 }
