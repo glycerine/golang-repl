@@ -4,8 +4,6 @@
 
 package gc
 
-//import "fmt"
-
 // AlgKind describes the kind of algorithms used for comparing and
 // hashing a Type.
 type AlgKind int

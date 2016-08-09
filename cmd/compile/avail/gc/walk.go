@@ -372,7 +372,7 @@ func walkstmt(n *Node) *Node {
 	return n
 }
 
-func isSmallMakeSlice(n *Node) bool {
+/*func isSmallMakeSlice(n *Node) bool {
 	if n.Op != OMAKESLICE {
 		return false
 	}
@@ -385,6 +385,7 @@ func isSmallMakeSlice(n *Node) bool {
 
 	return Smallintconst(l) && Smallintconst(r) && (t.Elem().Width == 0 || r.Int64() < (1<<16)/t.Elem().Width)
 }
+*/
 
 // walk the whole tree of the body of an
 // expression or simple statement.
