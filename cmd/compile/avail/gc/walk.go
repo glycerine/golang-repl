@@ -5,9 +5,9 @@
 package gc
 
 import (
+	"fmt"
 	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"github.com/glycerine/golang-repl/cmd/avail/sys"
-	"fmt"
 	"strings"
 )
 
@@ -97,10 +97,10 @@ func paramoutheap(fn *Node) bool {
 	for _, ln := range fn.Func.Dcl {
 		switch ln.Class {
 		case PPARAMOUT:
-			if ln.isParamStackCopy() || ln.Addrtaken {
+			/*jea if ln.isParamStackCopy() || ln.Addrtaken {
 				return true
 			}
-
+			*/
 		case PAUTO:
 			// stop early - parameters are over
 			return false
@@ -313,9 +313,10 @@ func walkstmt(n *Node) *Node {
 					break
 				}
 				if cl == PPARAMOUT {
-					if ln.isParamStackCopy() {
+					/*jea if ln.isParamStackCopy() {
 						ln = walkexpr(typecheck(Nod(OIND, ln.Name.Heapaddr, nil), Erv), nil)
 					}
+					*/
 					rl = append(rl, ln)
 				}
 			}
@@ -722,14 +723,14 @@ opswitch:
 		n.Left = walkexpr(n.Left, init)
 		n.Left = safeexpr(n.Left, init)
 
-		if oaslit(n, init) {
+		/*jeaif oaslit(n, init) {
 			break
 		}
 
 		if n.Right == nil || iszero(n.Right) && !instrumenting {
 			break
 		}
-
+		*/
 		switch n.Right.Op {
 		default:
 			n.Right = walkexpr(n.Right, init)
@@ -1054,7 +1055,7 @@ opswitch:
 			}
 			dowidth(n.Left.Type)
 			r := nodnil()
-			if n.Esc == EscNone && n.Left.Type.Width <= 1024 {
+			/*jea if n.Esc == EscNone && n.Left.Type.Width <= 1024 {
 				// Allocate stack buffer for value stored in interface.
 				r = temp(n.Left.Type)
 				r = Nod(OAS, r, nil) // zero temp
@@ -1063,6 +1064,7 @@ opswitch:
 				r = Nod(OADDR, r.Left, nil)
 				r = typecheck(r, Erv)
 			}
+			*/
 			ll = append(ll, r)
 		}
 
@@ -1264,10 +1266,12 @@ opswitch:
 		n.Left = walkexpr(n.Left, init)
 		low, high, max := n.SliceBounds()
 		low = walkexpr(low, init)
+		/*jea
 		if low != nil && iszero(low) {
-			// Reduce x[0:j] to x[:j] and x[0:j:k] to x[:j:k].
-			low = nil
-		}
+					// Reduce x[0:j] to x[:j] and x[0:j:k] to x[:j:k].
+					low = nil
+				}
+		*/
 		high = walkexpr(high, init)
 		max = walkexpr(max, init)
 		n.SetSliceBounds(low, high, max)
@@ -1289,7 +1293,7 @@ opswitch:
 		n.Left = walkexpr(n.Left, init)
 
 	case ONEW:
-		if n.Esc == EscNone {
+		/* jea if n.Esc == EscNone {
 			if n.Type.Elem().Width >= 1<<16 {
 				Fatalf("large ONEW with EscNone: %v", n)
 			}
@@ -1301,10 +1305,11 @@ opswitch:
 			r = typecheck(r, Erv)
 			n = r
 		} else {
-			n = callnew(n.Type.Elem())
-		}
+		*/
+		n = callnew(n.Type.Elem())
+	// jea }
 
-		// If one argument to the comparison is an empty string,
+	// If one argument to the comparison is an empty string,
 	// comparing the lengths instead will yield the same result
 	// without the function call.
 	case OCMPSTR:
@@ -1394,7 +1399,7 @@ opswitch:
 
 		a := nodnil() // hmap buffer
 		r := nodnil() // bucket buffer
-		if n.Esc == EscNone {
+		/* jea if n.Esc == EscNone {
 			// Allocate hmap buffer on stack.
 			var_ := temp(hmap(t))
 
@@ -1413,7 +1418,7 @@ opswitch:
 			init.Append(r)
 			r = Nod(OADDR, var_, nil)
 		}
-
+		*/
 		fn := syslook("makemap")
 		fn = substArgTypes(fn, hmap(t), mapbucket(t), t.Key(), t.Val())
 		n = mkcall1(fn, n.Type, init, typename(n.Type), conv(n.Left, Types[TINT64]), a, r)
@@ -1426,7 +1431,7 @@ opswitch:
 			l = r
 		}
 		t := n.Type
-		if n.Esc == EscNone {
+		/* jea if n.Esc == EscNone {
 			if !isSmallMakeSlice(n) {
 				Fatalf("non-small OMAKESLICE with EscNone: %v", n)
 			}
@@ -1444,33 +1449,34 @@ opswitch:
 			r = walkexpr(r, init)
 			n = r
 		} else {
-			// makeslice(et *Type, nel int64, max int64) (ary []any)
-			fn := syslook("makeslice")
+		*/
+		// makeslice(et *Type, nel int64, max int64) (ary []any)
+		fn := syslook("makeslice")
 
-			fn = substArgTypes(fn, t.Elem()) // any-1
-			n = mkcall1(fn, n.Type, init, typename(t.Elem()), conv(l, Types[TINT64]), conv(r, Types[TINT64]))
-		}
+		fn = substArgTypes(fn, t.Elem()) // any-1
+		n = mkcall1(fn, n.Type, init, typename(t.Elem()), conv(l, Types[TINT64]), conv(r, Types[TINT64]))
+		//jea		}
 
 	case ORUNESTR:
 		a := nodnil()
-		if n.Esc == EscNone {
+		/* jea if n.Esc == EscNone {
 			t := aindex(Nodintconst(4), Types[TUINT8])
 			var_ := temp(t)
 			a = Nod(OADDR, var_, nil)
 		}
-
+		*/
 		// intstring(*[4]byte, rune)
 		n = mkcall("intstring", n.Type, init, a, conv(n.Left, Types[TINT64]))
 
 	case OARRAYBYTESTR:
 		a := nodnil()
-		if n.Esc == EscNone {
+		/* jea if n.Esc == EscNone {
 			// Create temporary buffer for string on stack.
 			t := aindex(Nodintconst(tmpstringbufsize), Types[TUINT8])
 
 			a = Nod(OADDR, temp(t), nil)
 		}
-
+		*/
 		// slicebytetostring(*[32]byte, []byte) string;
 		n = mkcall("slicebytetostring", n.Type, init, a, n.Left)
 
@@ -1482,26 +1488,26 @@ opswitch:
 	case OARRAYRUNESTR:
 		a := nodnil()
 
-		if n.Esc == EscNone {
+		/* jea if n.Esc == EscNone {
 			// Create temporary buffer for string on stack.
 			t := aindex(Nodintconst(tmpstringbufsize), Types[TUINT8])
 
 			a = Nod(OADDR, temp(t), nil)
 		}
-
+		*/
 		n = mkcall("slicerunetostring", n.Type, init, a, n.Left)
 
 		// stringtoslicebyte(*32[byte], string) []byte;
 	case OSTRARRAYBYTE:
 		a := nodnil()
 
-		if n.Esc == EscNone {
+		/* jea if n.Esc == EscNone {
 			// Create temporary buffer for slice on stack.
 			t := aindex(Nodintconst(tmpstringbufsize), Types[TUINT8])
 
 			a = Nod(OADDR, temp(t), nil)
 		}
-
+		*/
 		n = mkcall("stringtoslicebyte", n.Type, init, a, conv(n.Left, Types[TSTRING]))
 
 		// stringtoslicebytetmp(string) []byte;
@@ -1512,13 +1518,13 @@ opswitch:
 	case OSTRARRAYRUNE:
 		a := nodnil()
 
-		if n.Esc == EscNone {
+		/* jea if n.Esc == EscNone {
 			// Create temporary buffer for slice on stack.
 			t := aindex(Nodintconst(tmpstringbufsize), Types[TINT32])
 
 			a = Nod(OADDR, temp(t), nil)
 		}
-
+		*/
 		n = mkcall("stringtoslicerune", n.Type, init, a, n.Left)
 
 		// ifaceeq(i1 any-1, i2 any-2) (ret bool);
@@ -1555,7 +1561,7 @@ opswitch:
 		n = r
 
 	case OARRAYLIT, OMAPLIT, OSTRUCTLIT, OPTRLIT:
-		if isStaticCompositeLiteral(n) {
+		/* jea if isStaticCompositeLiteral(n) {
 			// n can be directly represented in the read-only data section.
 			// Make direct reference to the static data. See issue 12841.
 			vstat := staticname(n.Type, 0)
@@ -1568,8 +1574,9 @@ opswitch:
 			n = typecheck(n, Erv)
 			break
 		}
+		*/
 		var_ := temp(n.Type)
-		anylit(0, n, var_, init)
+		// jea anylit(0, n, var_, init)
 		n = var_
 
 	case OSEND:
@@ -2035,11 +2042,11 @@ func callnew(t *Type) *Node {
 	return v
 }
 
-func iscallret(n *Node) bool {
+/*func iscallret(n *Node) bool {
 	n = outervalue(n)
 	return n.Op == OINDREG && n.Reg == int16(Thearch.REGSP)
 }
-
+*/
 func isstack(n *Node) bool {
 	n = outervalue(n)
 
@@ -2115,10 +2122,10 @@ func needwritebarrier(l *Node, r *Node) bool {
 	}
 
 	// No write barrier for zeroing or initialization to constant.
-	if iszero(r) || r.Op == OLITERAL {
+	/*jea if iszero(r) || r.Op == OLITERAL {
 		return false
 	}
-
+	*/
 	// No write barrier for storing static (read-only) data.
 	if r.Op == ONAME && strings.HasPrefix(r.Sym.Name, "statictmp_") {
 		return false

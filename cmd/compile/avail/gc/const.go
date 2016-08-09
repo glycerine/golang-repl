@@ -5,8 +5,8 @@
 package gc
 
 import (
-	"github.com/glycerine/golang-repl/cmd/compile/avail/big"
 	"github.com/glycerine/golang-repl/cmd/avail/obj"
+	"github.com/glycerine/golang-repl/cmd/compile/avail/big"
 	"strings"
 )
 
@@ -154,7 +154,7 @@ type canReuseNode bool
 
 const (
 	noReuse canReuseNode = false // not necessarily safe to reuse
-	reuseOK canReuseNode = true  // safe to reuse
+	//reuseOK canReuseNode = true  // safe to reuse
 )
 
 // convert n, if literal, to type t.

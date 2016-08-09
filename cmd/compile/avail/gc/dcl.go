@@ -5,10 +5,12 @@
 package gc
 
 import (
-	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"fmt"
+	//"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"sort"
 	"strings"
+	//"unicode"
+	//"unicode/utf8"
 )
 
 // Declaration stack & operations
@@ -86,6 +88,7 @@ func markdcl() {
 	block = blockgen
 }
 
+/*
 // keep around for debugging
 func dumpdclstack() {
 	i := 0
@@ -99,7 +102,7 @@ func dumpdclstack() {
 		i++
 	}
 }
-
+*/
 func testdclstack() {
 	for d := dclstack; d != nil; d = d.Link {
 		if d.Name == "" {
@@ -212,10 +215,10 @@ func declare(n *Node, ctxt Class) {
 	n.Name.Funcdepth = Funcdepth
 	n.Class = ctxt
 
-	autoexport(n, ctxt)
+	//jea autoexport(n, ctxt)
 }
 
-func addvar(n *Node, t *Type, ctxt Class) {
+/*func addvar(n *Node, t *Type, ctxt Class) {
 	if n == nil || n.Sym == nil || (n.Op != ONAME && n.Op != ONONAME) || t == nil {
 		Fatalf("addvar: n=%v t=%v nil", n, t)
 	}
@@ -224,7 +227,7 @@ func addvar(n *Node, t *Type, ctxt Class) {
 	declare(n, ctxt)
 	n.Type = t
 }
-
+*/
 // declare variables from grammar
 // new_name_list (type | [type] = expr_list)
 func variter(vl []*Node, t *Node, el []*Node) []*Node {
@@ -1123,14 +1126,14 @@ bad:
 	return nil
 }
 
-func methodname(n *Node, t *Type) *Node {
+/*func methodname(n *Node, t *Type) *Node {
 	s := methodsym(n.Sym, t, 0)
 	if s == nil {
 		return n
 	}
 	return newname(s)
 }
-
+*/
 func methodname1(n *Node, t *Node) *Node {
 	star := ""
 	if t.Op == OIND {
@@ -1263,6 +1266,7 @@ func addmethod(msym *Sym, t *Type, tpkg *Pkg, local, nointerface bool) {
 	pa.Methods().Append(f)
 }
 
+/*
 func funccompile(n *Node) {
 	Stksize = BADWIDTH
 	Maxarg = 0
@@ -1298,7 +1302,7 @@ func funccompile(n *Node) {
 	flushdata()
 	obj.Flushplist(Ctxt) // convert from Prog list to machine code
 }
-
+*/
 func funcsym(s *Sym) *Sym {
 	if s.Fsym != nil {
 		return s.Fsym
@@ -1324,7 +1328,7 @@ func makefuncsym(s *Sym) {
 	funcsyms = append(funcsyms, s1.Def)
 }
 
-type nowritebarrierrecChecker struct {
+/*type nowritebarrierrecChecker struct {
 	curfn  *Node
 	stable bool
 
@@ -1439,3 +1443,4 @@ func (c *nowritebarrierrecChecker) visitcall(n *Node) {
 	c.best[c.curfn] = nowritebarrierrecCall{target: defn, depth: fnbest.depth + 1, lineno: n.Lineno}
 	c.stable = false
 }
+*/

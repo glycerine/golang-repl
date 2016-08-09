@@ -4,7 +4,7 @@
 
 package gc
 
-import "fmt"
+//import "fmt"
 
 // AlgKind describes the kind of algorithms used for comparing and
 // hashing a Type.
@@ -180,6 +180,7 @@ func algtype1(t *Type) (AlgKind, *Type) {
 	return 0, nil
 }
 
+/*
 // Generate a helper function to compute the hash of a value of type t.
 func genhash(sym *Sym, t *Type) {
 	if Debug['r'] != 0 {
@@ -319,8 +320,8 @@ func genhash(sym *Sym, t *Type) {
 
 	safemode = old_safemode
 }
-
-func hashfor(t *Type) *Node {
+*/
+/*func hashfor(t *Type) *Node {
 	var sym *Sym
 
 	switch a, _ := algtype1(t); a {
@@ -354,7 +355,8 @@ func hashfor(t *Type) *Node {
 	n.Type = tfn.Type
 	return n
 }
-
+*/
+/*
 // geneq generates a helper function to
 // check equality of two values of type t.
 func geneq(sym *Sym, t *Type) {
@@ -514,19 +516,20 @@ func geneq(sym *Sym, t *Type) {
 	safemode = old_safemode
 	Disable_checknil--
 }
+*/
 
 // eqfield returns the node
 // 	p.field == q.field
-func eqfield(p *Node, q *Node, field *Sym) *Node {
+/*func eqfield(p *Node, q *Node, field *Sym) *Node {
 	nx := NodSym(OXDOT, p, field)
 	ny := NodSym(OXDOT, q, field)
 	ne := Nod(OEQ, nx, ny)
 	return ne
 }
-
+*/
 // eqmem returns the node
 // 	memequal(&p.field, &q.field [, size])
-func eqmem(p *Node, q *Node, field *Sym, size int64) *Node {
+/*func eqmem(p *Node, q *Node, field *Sym, size int64) *Node {
 	nx := Nod(OADDR, NodSym(OXDOT, p, field), nil)
 	nx.Etype = 1 // does not escape
 	ny := Nod(OADDR, NodSym(OXDOT, q, field), nil)
@@ -544,8 +547,8 @@ func eqmem(p *Node, q *Node, field *Sym, size int64) *Node {
 
 	return call
 }
-
-func eqmemfunc(size int64, t *Type) (fn *Node, needsize bool) {
+*/
+/*func eqmemfunc(size int64, t *Type) (fn *Node, needsize bool) {
 	switch size {
 	default:
 		fn = syslook("memequal")
@@ -558,12 +561,12 @@ func eqmemfunc(size int64, t *Type) (fn *Node, needsize bool) {
 	fn = substArgTypes(fn, t, t)
 	return fn, needsize
 }
-
+*/
 // memrun finds runs of struct fields for which memory-only algs are appropriate.
 // t is the parent struct type, and start is the field index at which to start the run.
 // size is the length in bytes of the memory included in the run.
 // next is the index just after the end of the memory run.
-func memrun(t *Type, start int) (size int64, next int) {
+/*func memrun(t *Type, start int) (size int64, next int) {
 	next = start
 	for {
 		next++
@@ -581,7 +584,7 @@ func memrun(t *Type, start int) (size int64, next int) {
 	}
 	return t.Field(next-1).End() - t.Field(start).Offset, next
 }
-
+*/
 // ispaddedfield reports whether the i'th field of struct type t is followed
 // by padding.
 func ispaddedfield(t *Type, i int) bool {

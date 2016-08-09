@@ -6,7 +6,7 @@ package gc
 
 import (
 	"bufio"
-	"github.com/glycerine/golang-repl/cmd/compile/avail/ssa"
+	//"github.com/glycerine/golang-repl/cmd/compile/avail/ssa"
 	"github.com/glycerine/golang-repl/cmd/avail/bio"
 	"github.com/glycerine/golang-repl/cmd/avail/obj"
 )
@@ -225,7 +225,7 @@ var maxfltval [NTYPE]*Mpflt
 
 var xtop []*Node
 
-var exportlist []*Node
+//var exportlist []*Node
 
 var importlist []*Node // imported functions and methods with inlinable bodies
 
@@ -247,7 +247,7 @@ var Maxarg int64
 
 var Stksize int64 // stack size for current frame
 
-var stkptrsize int64 // prefix of stack containing pointers
+//var stkptrsize int64 // prefix of stack containing pointers
 
 var hasdefer bool // flag that curfn has defer statement
 
@@ -293,9 +293,9 @@ var bstdout *bufio.Writer
 
 var Nacl bool
 
-var continpc *obj.Prog
+//var continpc *obj.Prog
 
-var breakpc *obj.Prog
+//var breakpc *obj.Prog
 
 var Pc *obj.Prog
 
@@ -392,10 +392,10 @@ type Arch struct {
 	Cmp64               func(*Node, *Node, Op, int, *obj.Prog) // only on 32-bit systems
 	Defframe            func(*obj.Prog)
 	Dodiv               func(Op, *Node, *Node, *Node)
-	Excise              func(*Flow)
-	Expandchecks        func(*obj.Prog)
-	Getg                func(*Node)
-	Gins                func(obj.As, *Node, *Node) *obj.Prog
+	//jea Excise              func(*Flow)
+	Expandchecks func(*obj.Prog)
+	Getg         func(*Node)
+	Gins         func(obj.As, *Node, *Node) *obj.Prog
 
 	// Ginscmp generates code comparing n1 to n2 and jumping away if op is satisfied.
 	// The returned prog should be Patch'ed with the jump target.
@@ -444,14 +444,14 @@ type Arch struct {
 	SSARegToReg []int16
 
 	// SSAMarkMoves marks any MOVXconst ops that need to avoid clobbering flags.
-	SSAMarkMoves func(*SSAGenState, *ssa.Block)
+	//	SSAMarkMoves func(*SSAGenState, *ssa.Block)
 
 	// SSAGenValue emits Prog(s) for the Value.
-	SSAGenValue func(*SSAGenState, *ssa.Value)
+	//	SSAGenValue func(*SSAGenState, *ssa.Value)
 
 	// SSAGenBlock emits end-of-block Progs. SSAGenValue should be called
 	// for all values in the block before SSAGenBlock.
-	SSAGenBlock func(s *SSAGenState, b, next *ssa.Block)
+	//	SSAGenBlock func(s *SSAGenState, b, next *ssa.Block)
 }
 
 var pcloc int32
@@ -466,15 +466,15 @@ var Deferreturn *Node
 
 var Panicindex *Node
 
-var panicslice *Node
+//var panicslice *Node
 
-var panicdivide *Node
+//var panicdivide *Node
 
-var throwreturn *Node
+//var throwreturn *Node
 
-var growslice *Node
+//var growslice *Node
 
-var writebarrierptr *Node
-var typedmemmove *Node
+////var writebarrierptr *Node
+//var typedmemmove *Node
 
-var panicdottype *Node
+//var panicdottype *Node

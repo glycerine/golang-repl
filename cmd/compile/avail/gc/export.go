@@ -1,22 +1,21 @@
-// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package gc
 
 import (
-	"bufio"
-	"bytes"
-	"github.com/glycerine/golang-repl/cmd/avail/bio"
+	//"bufio"
+	//"bytes"
 	"fmt"
+	//"github.com/glycerine/golang-repl/cmd/avail/bio"
 	"sort"
 	"unicode"
 	"unicode/utf8"
 )
 
 var (
-	newexport    bool // if set, use new export format
-	Debug_export int  // if set, print debugging information about export data
+	//	newexport    bool // if set, use new export format
+	Debug_export int // if set, print debugging information about export data
 	exportsize   int
 )
 
@@ -28,10 +27,10 @@ func exportf(format string, args ...interface{}) {
 	}
 }
 
-var asmlist []*Node
+//var asmlist []*Node
 
 // Mark n's symbol as exported
-func exportsym(n *Node) {
+/*func exportsym(n *Node) {
 	if n == nil || n.Sym == nil {
 		return
 	}
@@ -49,6 +48,9 @@ func exportsym(n *Node) {
 	}
 	exportlist = append(exportlist, n)
 }
+*/
+//jea from go.go
+var exportlist []*Node
 
 func exportname(s string) bool {
 	if r := s[0]; r < utf8.RuneSelf {
@@ -73,7 +75,7 @@ func exportedsym(sym *Sym) bool {
 	return sym.Pkg == localpkg && exportname(sym.Name)
 }
 
-func autoexport(n *Node, ctxt Class) {
+/*func autoexport(n *Node, ctxt Class) {
 	if n == nil || n.Sym == nil {
 		return
 	}
@@ -93,7 +95,7 @@ func autoexport(n *Node, ctxt Class) {
 		asmlist = append(asmlist, n)
 	}
 }
-
+*/
 func dumppkg(p *Pkg) {
 	if p == nil || p == localpkg || p.Exported || p == builtinpkg {
 		return
@@ -224,7 +226,7 @@ func reexportdep(n *Node) {
 	reexportdeplist(n.Nbody)
 }
 
-func dumpexportconst(s *Sym) {
+/*func dumpexportconst(s *Sym) {
 	n := typecheck(s.Def, Erv)
 	if n == nil || n.Op != OLITERAL {
 		Fatalf("dumpexportconst: oconst nil: %v", s)
@@ -239,8 +241,8 @@ func dumpexportconst(s *Sym) {
 		exportf("\tconst %v = %v\n", sconv(s, FmtSharp), vconv(n.Val(), FmtSharp))
 	}
 }
-
-func dumpexportvar(s *Sym) {
+*/
+/*func dumpexportvar(s *Sym) {
 	n := s.Def
 	n = typecheck(n, Erv|Ecall)
 	if n == nil || n.Type == nil {
@@ -256,7 +258,7 @@ func dumpexportvar(s *Sym) {
 			// when lazily typechecking inlined bodies, some re-exported ones may not have been typechecked yet.
 			// currently that can leave unresolved ONONAMEs in import-dot-ed packages in the wrong package
 			if Debug['l'] < 2 {
-				typecheckinl(n)
+				//jea typecheckinl(n)
 			}
 
 			// NOTE: The space after %#S here is necessary for ld's export data parser.
@@ -270,7 +272,7 @@ func dumpexportvar(s *Sym) {
 		exportf("\tvar %v %v\n", sconv(s, FmtSharp), Tconv(t, FmtSharp))
 	}
 }
-
+*/
 // methodbyname sorts types by symbol name.
 type methodbyname []*Field
 
@@ -328,7 +330,7 @@ func dumpexporttype(t *Type) {
 			// when lazily typechecking inlined bodies, some re-exported ones may not have been typechecked yet.
 			// currently that can leave unresolved ONONAMEs in import-dot-ed packages in the wrong package
 			if Debug['l'] < 2 {
-				typecheckinl(f.Type.Nname())
+				//jea typecheckinl(f.Type.Nname())
 			}
 			exportf("\tfunc %v %v %v { %v }\n", Tconv(f.Type.Recvs(), FmtSharp), sconv(f.Sym, FmtShort|FmtByte|FmtSharp), Tconv(f.Type, FmtShort|FmtSharp), hconv(f.Type.Nname().Func.Inl, FmtSharp|FmtBody))
 			reexportdeplist(f.Type.Nname().Func.Inl)
@@ -338,7 +340,7 @@ func dumpexporttype(t *Type) {
 	}
 }
 
-func dumpsym(s *Sym) {
+/*func dumpsym(s *Sym) {
 	if s.Flags&SymExported != 0 {
 		return
 	}
@@ -370,8 +372,8 @@ func dumpsym(s *Sym) {
 		dumpexportvar(s)
 	}
 }
-
-func dumpexport() {
+*/
+/*func dumpexport() {
 	if buildid != "" {
 		exportf("build id %q\n", buildid)
 	}
@@ -407,8 +409,9 @@ func dumpexport() {
 			pkgs = savedPkgs
 			pkgMap = savedPkgMap
 		} else {
-			size = export(bout.Writer, Debug_export != 0)
-		}
+
+		size = export(bout.Writer, Debug_export != 0)
+			}
 		exportf("\n$$\n")
 	} else {
 		// textual export
@@ -444,7 +447,7 @@ func dumpexport() {
 		fmt.Printf("export data size = %d bytes\n", size)
 	}
 }
-
+*/
 // importsym declares symbol s as an imported object representable by op.
 func importsym(s *Sym, op Op) {
 	if s.Def != nil && s.Def.Op != op {
@@ -581,7 +584,7 @@ func importtype(pt *Type, t *Type) {
 	}
 }
 
-func dumpasmhdr() {
+/*func dumpasmhdr() {
 	b, err := bio.Create(asmhdr)
 	if err != nil {
 		Fatalf("%v", err)
@@ -611,3 +614,4 @@ func dumpasmhdr() {
 
 	b.Close()
 }
+*/

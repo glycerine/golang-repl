@@ -47,7 +47,7 @@ func renameinit() *Sym {
 //              initdone· = 2                           (9)
 //              return                                  (10)
 //      }
-func anyinit(n []*Node) bool {
+/*func anyinit(n []*Node) bool {
 	// are there any interesting init statements
 	for _, ln := range n {
 		switch ln.Op {
@@ -86,8 +86,8 @@ func anyinit(n []*Node) bool {
 	// then none
 	return false
 }
-
-func fninit(n []*Node) {
+*/
+/*func fninit(n []*Node) {
 	if Debug['A'] != 0 {
 		// sys.go or unsafe.go during compiler build
 		return
@@ -181,3 +181,4 @@ func fninit(n []*Node) {
 	Curfn = nil
 	funccompile(fn)
 }
+*/

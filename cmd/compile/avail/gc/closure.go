@@ -4,10 +4,6 @@
 
 package gc
 
-import (
-	"fmt"
-)
-
 // function literals aka closures
 func closurehdr(ntype *Node) {
 	var name *Node
@@ -245,7 +241,7 @@ func makeclosure(func_ *Node) *Node {
 // by value or by reference.
 // We use value capturing for values <= 128 bytes that are never reassigned
 // after capturing (effectively constant).
-func capturevars(xfunc *Node) {
+/*func capturevars(xfunc *Node) {
 	lno := lineno
 	lineno = xfunc.Lineno
 
@@ -425,6 +421,7 @@ func transformclosure(xfunc *Node) {
 
 	lineno = lno
 }
+*/
 
 // hasemptycvars returns true iff closure func_ has an
 // empty list of captured vars. OXXX nodes don't count.
@@ -438,6 +435,7 @@ func hasemptycvars(func_ *Node) bool {
 	return true
 }
 
+/*
 // closuredebugruntimecheck applies boilerplate checks for debug flags
 // and compiling runtime
 func closuredebugruntimecheck(r *Node) {
@@ -452,7 +450,7 @@ func closuredebugruntimecheck(r *Node) {
 		yyerrorl(r.Lineno, "heap-allocated closure, not allowed in runtime.")
 	}
 }
-
+*/
 func walkclosure(func_ *Node, init *Nodes) *Node {
 	// If no closure vars, don't bother wrapping.
 	if hasemptycvars(func_) {
@@ -461,7 +459,7 @@ func walkclosure(func_ *Node, init *Nodes) *Node {
 		}
 		return func_.Func.Closure.Func.Nname
 	} else {
-		closuredebugruntimecheck(func_)
+		//jea closuredebugruntimecheck(func_)
 	}
 
 	// Create closure in the form of a composite literal.
@@ -509,6 +507,7 @@ func walkclosure(func_ *Node, init *Nodes) *Node {
 	// tag it with escape analysis result.
 	clos.Left.Esc = func_.Esc
 
+	/*jea
 	// non-escaping temp to use, if any.
 	// orderexpr did not compute the type; fill it in now.
 	if x := prealloc[func_]; x != nil {
@@ -517,11 +516,11 @@ func walkclosure(func_ *Node, init *Nodes) *Node {
 		clos.Left.Right = x
 		delete(prealloc, func_)
 	}
-
+	*/
 	return walkexpr(clos, init)
 }
 
-func typecheckpartialcall(fn *Node, sym *Sym) {
+/*func typecheckpartialcall(fn *Node, sym *Sym) {
 	switch fn.Op {
 	case ODOTINTER, ODOTMETH:
 		break
@@ -531,7 +530,7 @@ func typecheckpartialcall(fn *Node, sym *Sym) {
 	}
 
 	// Create top-level function.
-	xfunc := makepartialcall(fn, fn.Type, sym)
+	//jea xfunc := makepartialcall(fn, fn.Type, sym)
 	fn.Func = xfunc.Func
 	fn.Right = newname(sym)
 	fn.Op = OCALLPART
@@ -539,6 +538,7 @@ func typecheckpartialcall(fn *Node, sym *Sym) {
 }
 
 var makepartialcall_gopkg *Pkg
+
 
 func makepartialcall(fn *Node, t0 *Type, meth *Sym) *Node {
 	var p string
@@ -674,7 +674,7 @@ func makepartialcall(fn *Node, t0 *Type, meth *Sym) *Node {
 
 	return xfunc
 }
-
+*/
 func walkpartialcall(n *Node, init *Nodes) *Node {
 	// Create closure in the form of a composite literal.
 	// For x.M with receiver (x) type T, the generated code looks like:
@@ -714,12 +714,12 @@ func walkpartialcall(n *Node, init *Nodes) *Node {
 
 	// non-escaping temp to use, if any.
 	// orderexpr did not compute the type; fill it in now.
-	if x := prealloc[n]; x != nil {
+	/*ja if x := prealloc[n]; x != nil {
 		x.Type = clos.Left.Left.Type
 		x.Orig.Type = x.Type
 		clos.Left.Right = x
 		delete(prealloc, n)
 	}
-
+	*/
 	return walkexpr(clos, init)
 }

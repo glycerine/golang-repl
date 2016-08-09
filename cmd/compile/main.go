@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"github.com/glycerine/golang-repl/cmd/compile/avail/amd64"
-	"github.com/glycerine/golang-repl/cmd/compile/avail/x86"
 	"log"
 	"os"
 )
@@ -22,8 +21,6 @@ func main() {
 	default:
 		fmt.Fprintf(os.Stderr, "compile: unknown architecture %q\n", obj.Getgoarch())
 		os.Exit(2)
-	case "386":
-		x86.Main()
 	case "amd64", "amd64p32":
 		amd64.Main()
 	}

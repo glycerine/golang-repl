@@ -10,8 +10,8 @@
 package gc
 
 import (
-	"github.com/glycerine/golang-repl/cmd/compile/avail/ssa"
-	"fmt"
+//"github.com/glycerine/golang-repl/cmd/compile/avail/ssa"
+//"fmt"
 )
 
 // EType describes a kind of type.
@@ -110,10 +110,10 @@ var (
 	// Types to represent untyped numeric constants.
 	// Note: Currently these are only used within the binary export
 	// data format. The rest of the compiler only uses Types[TIDEAL].
-	idealint     = typ(TIDEAL)
-	idealrune    = typ(TIDEAL)
-	idealfloat   = typ(TIDEAL)
-	idealcomplex = typ(TIDEAL)
+//	idealint     = typ(TIDEAL)
+//	idealrune    = typ(TIDEAL)
+//	idealfloat   = typ(TIDEAL)
+//	idealcomplex = typ(TIDEAL)
 )
 
 // A Type represents a Go type.
@@ -457,12 +457,12 @@ func typPtr(elem *Type) *Type {
 }
 
 // typDDDField returns a new TDDDFIELD type for slice type s.
-func typDDDField(s *Type) *Type {
+/*func typDDDField(s *Type) *Type {
 	t := typ(TDDDFIELD)
 	t.Extra = DDDFieldType{T: s}
 	return t
 }
-
+*/
 // typChanArgs returns a new TCHANARGS type for channel type c.
 func typChanArgs(c *Type) *Type {
 	t := typ(TCHANARGS)
@@ -864,209 +864,6 @@ func (t *Type) SimpleString() string {
 	return t.Etype.String()
 }
 
-// Compare compares types for purposes of the SSA back
-// end, returning an ssa.Cmp (one of CMPlt, CMPeq, CMPgt).
-// The answers are correct for an optimizer
-// or code generator, but not necessarily typechecking.
-// The order chosen is arbitrary, only consistency and division
-// into equivalence classes (Types that compare CMPeq) matters.
-func (t *Type) Compare(u ssa.Type) ssa.Cmp {
-	x, ok := u.(*Type)
-	// ssa.CompilerType is smaller than gc.Type
-	// bare pointer equality is easy.
-	if !ok {
-		return ssa.CMPgt
-	}
-	if x == t {
-		return ssa.CMPeq
-	}
-	return t.cmp(x)
-}
-
-func cmpForNe(x bool) ssa.Cmp {
-	if x {
-		return ssa.CMPlt
-	}
-	return ssa.CMPgt
-}
-
-func (r *Sym) cmpsym(s *Sym) ssa.Cmp {
-	if r == s {
-		return ssa.CMPeq
-	}
-	if r == nil {
-		return ssa.CMPlt
-	}
-	if s == nil {
-		return ssa.CMPgt
-	}
-	// Fast sort, not pretty sort
-	if len(r.Name) != len(s.Name) {
-		return cmpForNe(len(r.Name) < len(s.Name))
-	}
-	if r.Pkg != s.Pkg {
-		if len(r.Pkg.Prefix) != len(s.Pkg.Prefix) {
-			return cmpForNe(len(r.Pkg.Prefix) < len(s.Pkg.Prefix))
-		}
-		if r.Pkg.Prefix != s.Pkg.Prefix {
-			return cmpForNe(r.Pkg.Prefix < s.Pkg.Prefix)
-		}
-	}
-	if r.Name != s.Name {
-		return cmpForNe(r.Name < s.Name)
-	}
-	return ssa.CMPeq
-}
-
-// cmp compares two *Types t and x, returning ssa.CMPlt,
-// ssa.CMPeq, ssa.CMPgt as t<x, t==x, t>x, for an arbitrary
-// and optimizer-centric notion of comparison.
-func (t *Type) cmp(x *Type) ssa.Cmp {
-	// This follows the structure of Eqtype in subr.go
-	// with two exceptions.
-	// 1. Symbols are compared more carefully because a <,=,> result is desired.
-	// 2. Maps are treated specially to avoid endless recursion -- maps
-	//    contain an internal data type not expressible in Go source code.
-	if t == x {
-		return ssa.CMPeq
-	}
-	if t == nil {
-		return ssa.CMPlt
-	}
-	if x == nil {
-		return ssa.CMPgt
-	}
-
-	if t.Etype != x.Etype {
-		return cmpForNe(t.Etype < x.Etype)
-	}
-
-	if t.Sym != nil || x.Sym != nil {
-		// Special case: we keep byte and uint8 separate
-		// for error messages. Treat them as equal.
-		switch t.Etype {
-		case TUINT8:
-			if (t == Types[TUINT8] || t == bytetype) && (x == Types[TUINT8] || x == bytetype) {
-				return ssa.CMPeq
-			}
-
-		case TINT32:
-			if (t == Types[runetype.Etype] || t == runetype) && (x == Types[runetype.Etype] || x == runetype) {
-				return ssa.CMPeq
-			}
-		}
-	}
-
-	if c := t.Sym.cmpsym(x.Sym); c != ssa.CMPeq {
-		return c
-	}
-
-	if x.Sym != nil {
-		// Syms non-nil, if vargens match then equal.
-		if t.Vargen != x.Vargen {
-			return cmpForNe(t.Vargen < x.Vargen)
-		}
-		return ssa.CMPeq
-	}
-	// both syms nil, look at structure below.
-
-	switch t.Etype {
-	case TBOOL, TFLOAT32, TFLOAT64, TCOMPLEX64, TCOMPLEX128, TUNSAFEPTR, TUINTPTR,
-		TINT8, TINT16, TINT32, TINT64, TINT, TUINT8, TUINT16, TUINT32, TUINT64, TUINT:
-		return ssa.CMPeq
-	}
-
-	switch t.Etype {
-	case TMAP:
-		if c := t.Key().cmp(x.Key()); c != ssa.CMPeq {
-			return c
-		}
-		return t.Val().cmp(x.Val())
-
-	case TPTR32, TPTR64, TSLICE:
-		// No special cases for these, they are handled
-		// by the general code after the switch.
-
-	case TSTRUCT:
-		if t.StructType().Map == nil {
-			if x.StructType().Map != nil {
-				return ssa.CMPlt // nil < non-nil
-			}
-			// to the fallthrough
-		} else if x.StructType().Map == nil {
-			return ssa.CMPgt // nil > non-nil
-		} else if t.StructType().Map.MapType().Bucket == t {
-			// Both have non-nil Map
-			// Special case for Maps which include a recursive type where the recursion is not broken with a named type
-			if x.StructType().Map.MapType().Bucket != x {
-				return ssa.CMPlt // bucket maps are least
-			}
-			return t.StructType().Map.cmp(x.StructType().Map)
-		} else if x.StructType().Map.MapType().Bucket == x {
-			return ssa.CMPgt // bucket maps are least
-		} // If t != t.Map.Bucket, fall through to general case
-
-		fallthrough
-	case TINTER:
-		t1, ti := IterFields(t)
-		x1, xi := IterFields(x)
-		for ; t1 != nil && x1 != nil; t1, x1 = ti.Next(), xi.Next() {
-			if t1.Embedded != x1.Embedded {
-				return cmpForNe(t1.Embedded < x1.Embedded)
-			}
-			if t1.Note != x1.Note {
-				return cmpForNe(t1.Note < x1.Note)
-			}
-			if c := t1.Sym.cmpsym(x1.Sym); c != ssa.CMPeq {
-				return c
-			}
-			if c := t1.Type.cmp(x1.Type); c != ssa.CMPeq {
-				return c
-			}
-		}
-		if t1 != x1 {
-			return cmpForNe(t1 == nil)
-		}
-		return ssa.CMPeq
-
-	case TFUNC:
-		for _, f := range recvsParamsResults {
-			// Loop over fields in structs, ignoring argument names.
-			ta, ia := IterFields(f(t))
-			tb, ib := IterFields(f(x))
-			for ; ta != nil && tb != nil; ta, tb = ia.Next(), ib.Next() {
-				if ta.Isddd != tb.Isddd {
-					return cmpForNe(!ta.Isddd)
-				}
-				if c := ta.Type.cmp(tb.Type); c != ssa.CMPeq {
-					return c
-				}
-			}
-			if ta != tb {
-				return cmpForNe(ta == nil)
-			}
-		}
-		return ssa.CMPeq
-
-	case TARRAY:
-		if t.NumElem() != x.NumElem() {
-			return cmpForNe(t.NumElem() < x.NumElem())
-		}
-
-	case TCHAN:
-		if t.ChanDir() != x.ChanDir() {
-			return cmpForNe(t.ChanDir() < x.ChanDir())
-		}
-
-	default:
-		e := fmt.Sprintf("Do not know how to compare %s with %s", t, x)
-		panic(e)
-	}
-
-	// Common element type comparison for TARRAY, TCHAN, TPTR32, TPTR64, and TSLICE.
-	return t.Elem().cmp(x.Elem())
-}
-
 // IsKind reports whether t is a Type of the specified kind.
 func (t *Type) IsKind(et EType) bool {
 	return t != nil && t.Etype == et
@@ -1154,6 +951,7 @@ func (t *Type) IsEmptyInterface() bool {
 	return t.IsInterface() && t.NumFields() == 0
 }
 
+/*
 func (t *Type) ElemType() ssa.Type {
 	// TODO(josharian): If Type ever moves to a shared
 	// internal package, remove this silly wrapper.
@@ -1162,13 +960,15 @@ func (t *Type) ElemType() ssa.Type {
 func (t *Type) PtrTo() ssa.Type {
 	return Ptrto(t)
 }
-
+*/
 func (t *Type) NumFields() int {
 	return t.Fields().Len()
 }
-func (t *Type) FieldType(i int) ssa.Type {
+
+/*func (t *Type) FieldType(i int) ssa.Type {
 	return t.Field(i).Type
 }
+*/
 func (t *Type) FieldOff(i int) int64 {
 	return t.Field(i).Offset
 }

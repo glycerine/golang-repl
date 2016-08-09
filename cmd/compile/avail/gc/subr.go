@@ -6,10 +6,10 @@ package gc
 
 import (
 	"bytes"
-	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"crypto/md5"
 	"encoding/binary"
 	"fmt"
+	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"os"
 	"runtime/debug"
 	"sort"
@@ -1387,9 +1387,10 @@ func safeexpr(n *Node, init *Nodes) *Node {
 		return a
 
 	case OSTRUCTLIT, OARRAYLIT:
-		if isStaticCompositeLiteral(n) {
+		/*jea		if isStaticCompositeLiteral(n) {
 			return n
 		}
+		*/
 	}
 
 	// make a copy; must not be used as an lvalue
@@ -1909,14 +1910,14 @@ func genwrapper(rcvr *Type, method *Field, newnam *Sym, iface int) {
 	fn = typecheck(fn, Etop)
 	typecheckslice(fn.Nbody.Slice(), Etop)
 
-	inlcalls(fn)
-	escAnalyze([]*Node{fn}, false)
+	//jea inlcalls(fn)
+	//jea escAnalyze([]*Node{fn}, false)
 
 	Curfn = nil
-	funccompile(fn)
+	//jea funccompile(fn)
 }
 
-func hashmem(t *Type) *Node {
+/*func hashmem(t *Type) *Node {
 	sym := Pkglookup("memhash", Runtimepkg)
 
 	n := newname(sym)
@@ -1930,7 +1931,7 @@ func hashmem(t *Type) *Node {
 	n.Type = tfn.Type
 	return n
 }
-
+*/
 func ifacelookdot(s *Sym, t *Type, followptr *bool, ignorecase bool) *Field {
 	*followptr = false
 
@@ -2142,13 +2143,13 @@ func tounsigned(t *Type) *Type {
 	return t
 }
 
-func ngotype(n *Node) *Sym {
+/*func ngotype(n *Node) *Sym {
 	if n.Type != nil {
 		return typenamesym(n.Type)
 	}
 	return nil
 }
-
+*/
 // Convert raw string to the prefix that will be used in the symbol
 // table. All control characters, space, '%' and '"', as well as
 // non-7-bit clean bytes turn into %xx. The period needs escaping

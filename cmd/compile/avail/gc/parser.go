@@ -406,7 +406,7 @@ func (p *parser) import_package() {
 
 	if importpkg.Name == "" {
 		importpkg.Name = name
-		numImport[name]++
+		//jea numImport[name]++
 	} else if importpkg.Name != name {
 		Yyerror("conflicting names %s and %s for package %q", importpkg.Name, name, importpkg.Path)
 	}
@@ -1975,7 +1975,7 @@ func (p *parser) hidden_fndcl() *Node {
 		s := s1
 		t := functype(nil, s3, s5)
 
-		importsym(s, ONAME)
+		/*jea importsym(s, ONAME)
 		if s.Def != nil && s.Def.Op == ONAME {
 			if Eqtype(t, s.Def.Type) {
 				dclcontext = PDISCARD // since we skip funchdr below
@@ -1983,7 +1983,7 @@ func (p *parser) hidden_fndcl() *Node {
 			}
 			Yyerror("inconsistent definition for func %v during import\n\t%v\n\t%v", s, s.Def.Type, t)
 		}
-
+		*/
 		ss := newfuncname(s)
 		ss.Type = t
 		declare(ss, PFUNC)

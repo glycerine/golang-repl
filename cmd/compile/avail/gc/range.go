@@ -4,6 +4,50 @@
 
 package gc
 
+// jea from gen.go
+// make a new off the books
+func Tempname(nn *Node, t *Type) {
+	if Curfn == nil {
+		Fatalf("no curfn for tempname")
+	}
+	if Curfn.Func.Closure != nil && Curfn.Op == OCLOSURE {
+		Dump("Tempname", Curfn)
+		Fatalf("adding tempname to wrong closure function")
+	}
+
+	if t == nil {
+		Yyerror("tempname called with nil type")
+		t = Types[TINT32]
+	}
+
+	// give each tmp a different name so that there
+	// a chance to registerizer them
+	s := LookupN("autotmp_", statuniqgen)
+	statuniqgen++
+	n := Nod(ONAME, nil, nil)
+	n.Sym = s
+	s.Def = n
+	n.Type = t
+	n.Class = PAUTO
+	n.Addable = true
+	n.Ullman = 1
+	//jea n.Esc = EscNever
+	n.Name.Curfn = Curfn
+	Curfn.Func.Dcl = append(Curfn.Func.Dcl, n)
+
+	//jea dowidth(t)
+	n.Xoffset = 0
+	*nn = *n
+}
+
+//jea from gen.go
+func temp(t *Type) *Node {
+	var n Node
+	Tempname(&n, t)
+	n.Sym.Def.Used = true
+	return n.Orig
+}
+
 // range
 func typecheckrange(n *Node) {
 	var toomany int
@@ -165,11 +209,12 @@ func walkrange(n *Node) {
 		Fatalf("walkrange")
 
 	case TARRAY, TSLICE:
+		/*jea
 		if memclrrange(n, v1, v2, a) {
-			lineno = lno
-			return
-		}
-
+					lineno = lno
+					return
+				}
+		*/
 		// orderstmt arranged for a copy of the array/slice variable if needed.
 		ha := a
 
@@ -340,6 +385,7 @@ func walkrange(n *Node) {
 // in which the evaluation of a is side-effect-free.
 //
 // Parameters are as in walkrange: "for v1, v2 = range a".
+/*
 func memclrrange(n, v1, v2, a *Node) bool {
 	if Debug['N'] != 0 || instrumenting {
 		return false
@@ -407,3 +453,4 @@ func memclrrange(n, v1, v2, a *Node) bool {
 	n = walkstmt(n)
 	return true
 }
+*/

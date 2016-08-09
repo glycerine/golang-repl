@@ -5,8 +5,8 @@
 package gc
 
 import (
-	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"fmt"
+	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"math"
 	"strings"
 )
@@ -847,7 +847,7 @@ OpSwitch:
 			return n
 		}
 
-		s := n.Sym
+		//jea s := n.Sym
 
 		if n.Left.Op == OTYPE {
 			if !looktypedot(n, t, 0) {
@@ -924,7 +924,7 @@ OpSwitch:
 			if top&Ecall != 0 {
 				ok |= Ecall
 			} else {
-				typecheckpartialcall(n, s)
+				//jea typecheckpartialcall(n, s)
 				ok |= Erv
 			}
 

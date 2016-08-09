@@ -6,8 +6,8 @@ package gc
 
 import (
 	"bytes"
-	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"fmt"
+	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -247,7 +247,7 @@ func jconv(n *Node, flag FmtFlag) string {
 	}
 
 	if c == 0 && n.Xoffset != BADWIDTH {
-		fmt.Fprintf(&buf, " x(%d%+d)", n.Xoffset, stkdelta[n])
+		//jea		fmt.Fprintf(&buf, " x(%d%+d)", n.Xoffset, stkdelta[n])
 	}
 
 	if n.Class != 0 {
@@ -268,7 +268,7 @@ func jconv(n *Node, flag FmtFlag) string {
 	if n.Func != nil && n.Func.Depth != 0 {
 		fmt.Fprintf(&buf, " ff(%d)", n.Func.Depth)
 	}
-
+	/* jea
 	switch n.Esc {
 	case EscUnknown:
 		break
@@ -286,7 +286,6 @@ func jconv(n *Node, flag FmtFlag) string {
 		if c == 0 {
 			buf.WriteString(" esc(N)")
 		}
-
 	default:
 		fmt.Fprintf(&buf, " esc(%d)", n.Esc)
 	}
@@ -294,6 +293,7 @@ func jconv(n *Node, flag FmtFlag) string {
 	if e, ok := n.Opt().(*NodeEscState); ok && e.Escloopdepth != 0 {
 		fmt.Fprintf(&buf, " ld(%d)", e.Escloopdepth)
 	}
+	*/
 
 	if c == 0 && n.Typecheck != 0 {
 		fmt.Fprintf(&buf, " tc(%d)", n.Typecheck)
@@ -461,7 +461,7 @@ func symfmt(s *Sym, flag FmtFlag) string {
 			}
 
 			// If the name was used by multiple packages, display the full path,
-			if s.Pkg.Name != "" && numImport[s.Pkg.Name] > 1 {
+			if s.Pkg.Name != "" { //jea && numImport[s.Pkg.Name] > 1 {
 				return fmt.Sprintf("%q.%s", s.Pkg.Path, s.Name)
 			}
 			return s.Pkg.Name + "." + s.Name

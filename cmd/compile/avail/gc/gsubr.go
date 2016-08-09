@@ -31,9 +31,9 @@
 package gc
 
 import (
+	"fmt"
 	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"github.com/glycerine/golang-repl/cmd/avail/sys"
-	"fmt"
 	"runtime"
 	"strings"
 )
@@ -162,7 +162,7 @@ func Clearp(p *obj.Prog) {
 	pcloc++
 }
 
-func dumpdata() {
+/*func dumpdata() {
 	ddumped = true
 	if dfirst == nil {
 		return
@@ -172,8 +172,8 @@ func dumpdata() {
 	Pc = dpc
 	Clearp(Pc)
 }
-
-func flushdata() {
+*/
+/*func flushdata() {
 	if dfirst == nil {
 		return
 	}
@@ -208,18 +208,18 @@ func fixautoused(p *obj.Prog) {
 		}
 
 		if p.From.Name == obj.NAME_AUTO && p.From.Node != nil {
-			p.From.Offset += stkdelta[p.From.Node.(*Node)]
+			//jea p.From.Offset += stkdelta[p.From.Node.(*Node)]
 		}
 
 		if p.To.Name == obj.NAME_AUTO && p.To.Node != nil {
-			p.To.Offset += stkdelta[p.To.Node.(*Node)]
+			//jea p.To.Offset += stkdelta[p.To.Node.(*Node)]
 		}
 
 		lp = &p.Link
 	}
 }
-
-func ggloblnod(nam *Node) {
+*/
+/*func ggloblnod(nam *Node) {
 	p := Thearch.Gins(obj.AGLOBL, nam, nil)
 	p.Lineno = nam.Lineno
 	p.From.Sym.Gotype = Linksym(ngotype(nam))
@@ -234,7 +234,7 @@ func ggloblnod(nam *Node) {
 		p.From3.Offset |= obj.NOPTR
 	}
 }
-
+*/
 func ggloblsym(s *Sym, width int32, flags int16) {
 	ggloblLSym(Linksym(s), width, flags)
 }
@@ -254,7 +254,7 @@ func ggloblLSym(s *obj.LSym, width int32, flags int16) {
 	p.From3.Offset = int64(flags)
 }
 
-func gjmp(to *obj.Prog) *obj.Prog {
+/*func gjmp(to *obj.Prog) *obj.Prog {
 	p := Gbranch(obj.AJMP, nil, 0)
 	if to != nil {
 		Patch(p, to)
@@ -272,7 +272,7 @@ func gtrack(s *Sym) {
 func gused(n *Node) {
 	Thearch.Gins(obj.ANOP, n, nil) // used
 }
-
+*/
 func Isfat(t *Type) bool {
 	if t != nil {
 		switch t.Etype {
@@ -286,7 +286,7 @@ func Isfat(t *Type) bool {
 }
 
 // Sweep the prog list to mark any used nodes.
-func markautoused(p *obj.Prog) {
+/*func markautoused(p *obj.Prog) {
 	for ; p != nil; p = p.Link {
 		if p.As == obj.ATYPE || p.As == obj.AVARDEF || p.As == obj.AVARKILL {
 			continue
@@ -301,7 +301,7 @@ func markautoused(p *obj.Prog) {
 		}
 	}
 }
-
+*/
 // Naddr rewrites a to refer to n.
 // It assumes that a is zeroed on entry.
 func Naddr(a *obj.Addr, n *Node) {
@@ -505,7 +505,7 @@ func Naddr(a *obj.Addr, n *Node) {
 	}
 }
 
-func newplist() *obj.Plist {
+/*func newplist() *obj.Plist {
 	pl := obj.Linknewplist(Ctxt)
 
 	Pc = Ctxt.NewProg()
@@ -514,7 +514,7 @@ func newplist() *obj.Plist {
 
 	return pl
 }
-
+*/
 // nodarg returns a Node for the function argument denoted by t,
 // which is either the entire function argument or result struct (t is a  struct *Type)
 // or a specific argument (t is a *Field within a struct *Type).
@@ -573,9 +573,9 @@ func nodarg(t interface{}, fp int) *Node {
 			// At some quieter time (assuming we've never seen these Fatalfs happen)
 			// we could change this code to use "expect" directly.
 			expect := t.Nname
-			if expect.isParamHeapCopy() {
-				expect = expect.Name.Param.Stackcopy
-			}
+			//jea if expect.isParamHeapCopy() {
+			//	expect = expect.Name.Param.Stackcopy
+			//}
 
 			for _, n := range Curfn.Func.Dcl {
 				if (n.Class == PPARAM || n.Class == PPARAMOUT) && !isblanksym(t.Sym) && n.Sym == t.Sym {
@@ -641,7 +641,7 @@ func Patch(p *obj.Prog, to *obj.Prog) {
 	p.To.Offset = to.Pc
 }
 
-func unpatch(p *obj.Prog) *obj.Prog {
+/*func unpatch(p *obj.Prog) *obj.Prog {
 	if p.To.Type != obj.TYPE_BRANCH {
 		Fatalf("unpatch: not a branch")
 	}
@@ -650,7 +650,7 @@ func unpatch(p *obj.Prog) *obj.Prog {
 	p.To.Offset = 0
 	return q
 }
-
+*/
 var reg [100]int       // count of references to reg
 var regstk [100][]byte // allocation sites, when -v is given
 
@@ -661,7 +661,7 @@ func SetReg(r, v int) {
 	reg[r-Thearch.REGMIN] = v
 }
 
-func ginit() {
+/*func ginit() {
 	for r := range reg {
 		reg[r] = 1
 	}
@@ -703,6 +703,7 @@ func gclean() {
 		}
 	}
 }
+*/
 
 func Anyregalloc() bool {
 	n := 0
@@ -769,7 +770,7 @@ Switch:
 		Fatalf("out of floating registers")
 
 	case TCOMPLEX64, TCOMPLEX128:
-		Tempname(n, t)
+		//jea Tempname(n, t)
 		return
 	}
 

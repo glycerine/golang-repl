@@ -5,10 +5,10 @@
 package gc
 
 import (
-	"github.com/glycerine/golang-repl/cmd/avail/bio"
-	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"crypto/sha256"
 	"fmt"
+	//"github.com/glycerine/golang-repl/cmd/avail/bio"
+	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"io"
 	"strconv"
 )
@@ -18,10 +18,10 @@ const (
 	ArhdrSize = 60
 )
 
-func formathdr(arhdr []byte, name string, size int64) {
+/*func formathdr(arhdr []byte, name string, size int64) {
 	copy(arhdr[:], fmt.Sprintf("%-16s%-12d%-6d%-6d%-8o%-10d`\n", name, 0, 0, 0, 0644, size))
 }
-
+*/
 // These modes say which kind of object file to generate.
 // The default use of the toolchain is to set both bits,
 // generating a combined compiler+linker object, one that
@@ -35,12 +35,12 @@ func formathdr(arhdr []byte, name string, size int64) {
 // By default a combined object is written, but if -linkobj is specified
 // on the command line then the default -o output is a compiler object
 // and the -linkobj output is a linker object.
-const (
+/*const (
 	modeCompilerObj = 1 << iota
 	modeLinkerObj
 )
-
-func dumpobj() {
+*/
+/*func dumpobj() {
 	if linkobj == "" {
 		dumpobj1(outfile, modeCompilerObj|modeLinkerObj)
 	} else {
@@ -162,8 +162,8 @@ func dumpobj1(outfile string, mode int) {
 
 	bout.Close()
 }
-
-func dumpglobls() {
+*/
+/*func dumpglobls() {
 	// add globals
 	for _, n := range externdcl {
 		if n.Op != ONAME {
@@ -191,7 +191,7 @@ func dumpglobls() {
 	// Do not reprocess funcsyms on next dumpglobls call.
 	funcsyms = nil
 }
-
+*/
 func Linksym(s *Sym) *obj.LSym {
 	if s == nil {
 		return nil
@@ -299,9 +299,9 @@ func stringsym(s string) (hdr, data *obj.LSym) {
 	return symhdr, symdata
 }
 
-var slicebytes_gen int
+//var slicebytes_gen int
 
-func slicebytes(nam *Node, s string, len int) {
+/*func slicebytes(nam *Node, s string, len int) {
 	slicebytes_gen++
 	symname := fmt.Sprintf(".gobytes.%d", slicebytes_gen)
 	sym := Pkglookup(symname, localpkg)
@@ -318,7 +318,7 @@ func slicebytes(nam *Node, s string, len int) {
 	off = duintxx(nam.Sym, off, uint64(len), Widthint)
 	duintxx(nam.Sym, off, uint64(len), Widthint)
 }
-
+*/
 func Datastring(s string, a *obj.Addr) {
 	_, symdata := stringsym(s)
 	a.Type = obj.TYPE_MEM
@@ -337,7 +337,7 @@ func datagostring(sval string, a *obj.Addr) {
 	a.Etype = uint8(TSTRING)
 }
 
-func dgostringptr(s *Sym, off int, str string) int {
+/*func dgostringptr(s *Sym, off int, str string) int {
 	if str == "" {
 		return duintptr(s, off, 0)
 	}
@@ -354,11 +354,11 @@ func dgostrlitptr(s *Sym, off int, lit *string) int {
 	off += Widthptr
 	return off
 }
-
-func dsname(s *Sym, off int, t string) int {
+*/
+/*func dsname(s *Sym, off int, t string) int {
 	return dsnameLSym(Linksym(s), off, t)
 }
-
+*/
 func dsnameLSym(s *obj.LSym, off int, t string) int {
 	s.WriteString(Ctxt, int64(off), len(t), t)
 	return off + len(t)
@@ -381,7 +381,7 @@ func dsymptrOffLSym(s *obj.LSym, off int, x *obj.LSym, xoff int) int {
 	return off
 }
 
-func gdata(nam *Node, nr *Node, wid int) {
+/*func gdata(nam *Node, nr *Node, wid int) {
 	if nam.Op != ONAME {
 		Fatalf("gdata nam op %v", nam.Op)
 	}
@@ -436,8 +436,8 @@ func gdata(nam *Node, nr *Node, wid int) {
 		Fatalf("gdata unhandled op %v %v\n", nr, nr.Op)
 	}
 }
-
-func gdatacomplex(nam *Node, cval *Mpcplx) {
+*/
+/*func gdatacomplex(nam *Node, cval *Mpcplx) {
 	t := Types[cplxsubtype(nam.Type.Etype)]
 	r := cval.Real.Float64()
 	i := cval.Imag.Float64()
@@ -459,3 +459,4 @@ func gdatastring(nam *Node, sval string) {
 	s.WriteAddr(Ctxt, nam.Xoffset, Widthptr, symdata, 0)
 	s.WriteInt(Ctxt, nam.Xoffset+int64(Widthptr), Widthint, int64(len(sval)))
 }
+*/

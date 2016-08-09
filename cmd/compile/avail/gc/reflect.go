@@ -5,9 +5,9 @@
 package gc
 
 import (
+	"fmt"
 	"github.com/glycerine/golang-repl/cmd/avail/gcprog"
 	"github.com/glycerine/golang-repl/cmd/avail/obj"
-	"fmt"
 	"os"
 	"sort"
 	"strings"
@@ -1349,7 +1349,7 @@ ok:
 	return s
 }
 
-func dumptypestructs() {
+/*func dumptypestructs() {
 	// copy types from externdcl list to signatlist
 	for _, n := range externdcl {
 		if n.Op != OTYPE {
@@ -1439,12 +1439,13 @@ func dumptypestructs() {
 		dimportpath(mkpkg("main"))
 	}
 }
-
-type pkgByPath []*Pkg
+*/
+/*type pkgByPath []*Pkg
 
 func (a pkgByPath) Len() int           { return len(a) }
 func (a pkgByPath) Less(i, j int) bool { return a[i].Path < a[j].Path }
 func (a pkgByPath) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+*/
 
 func dalgsym(t *Type) *Sym {
 	var s *Sym
@@ -1493,8 +1494,8 @@ func dalgsym(t *Type) *Sym {
 		hashfunc = typesymprefix(".hashfunc", t)
 		eqfunc = typesymprefix(".eqfunc", t)
 
-		genhash(hash, t)
-		geneq(eq, t)
+		//jea genhash(hash, t)
+		//jea geneq(eq, t)
 
 		// make Go funcs (closures) for calling hash and equal from Go
 		dsymptr(hashfunc, 0, hash, 0)
@@ -1566,7 +1567,7 @@ func dgcsym(t *Type) (sym *Sym, useGCProg bool, ptrdata int64) {
 // dgcptrmask emits and returns the symbol containing a pointer mask for type t.
 func dgcptrmask(t *Type) *Sym {
 	ptrmask := make([]byte, (typeptrdata(t)/int64(Widthptr)+7)/8)
-	fillptrmask(t, ptrmask)
+	//jea fillptrmask(t, ptrmask)
 	p := fmt.Sprintf("gcbits.%x", ptrmask)
 
 	sym := Pkglookup(p, Runtimepkg)
@@ -1580,6 +1581,7 @@ func dgcptrmask(t *Type) *Sym {
 	return sym
 }
 
+/*jea
 // fillptrmask fills in ptrmask with 1s corresponding to the
 // word offsets in t that hold pointers.
 // ptrmask is assumed to fit at least typeptrdata(t)/Widthptr bits.
@@ -1602,6 +1604,7 @@ func fillptrmask(t *Type, ptrmask []byte) {
 		}
 	}
 }
+*/
 
 // dgcprog emits and returns the symbol containing a GC program for type t
 // along with the size of the data described by the program (in the range [typeptrdata(t), t.Width]).

@@ -8,11 +8,11 @@ package gc
 
 import (
 	"bufio"
-	"github.com/glycerine/golang-repl/cmd/compile/avail/ssa"
-	"github.com/glycerine/golang-repl/cmd/avail/obj"
-	"github.com/glycerine/golang-repl/cmd/avail/sys"
+	//"github.com/glycerine/golang-repl/cmd/compile/avail/ssa"
 	"flag"
 	"fmt"
+	"github.com/glycerine/golang-repl/cmd/avail/obj"
+	"github.com/glycerine/golang-repl/cmd/avail/sys"
 	"io"
 	"log"
 	"os"
@@ -56,7 +56,7 @@ var debugtab = []struct {
 	{"slice", &Debug_slice},           // print information about slice compilation
 	{"typeassert", &Debug_typeassert}, // print information about type assertion inlining
 	{"wb", &Debug_wb},                 // print information about write barriers
-	{"export", &Debug_export},         // print export data
+	//{"export", &Debug_export},         // print export data
 }
 
 func usage() {
@@ -184,7 +184,7 @@ func Main() {
 	obj.Flagcount("live", "debug liveness analysis", &debuglive)
 	obj.Flagcount("m", "print optimization decisions", &Debug['m'])
 	flag.BoolVar(&flag_msan, "msan", false, "build code compatible with C/C++ memory sanitizer")
-	flag.BoolVar(&newexport, "newexport", true, "use new export format") // TODO(gri) remove eventually (issue 15323)
+	//flag.BoolVar(&newexport, "newexport", true, "use new export format") // TODO(gri) remove eventually (issue 15323)
 	flag.BoolVar(&nolocalimports, "nolocalimports", false, "reject local (relative) imports")
 	flag.StringVar(&outfile, "o", "", "write output to `file`")
 	flag.StringVar(&myimportpath, "p", "", "set expected package import `path`")
@@ -210,7 +210,7 @@ func Main() {
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "write cpu profile to `file`")
 	flag.StringVar(&memprofile, "memprofile", "", "write memory profile to `file`")
 	flag.Int64Var(&memprofilerate, "memprofilerate", 0, "set runtime.MemProfileRate to `rate`")
-	flag.BoolVar(&ssaEnabled, "ssa", true, "use SSA backend to generate code")
+	//flag.BoolVar(&ssaEnabled, "ssa", true, "use SSA backend to generate code")
 	obj.Flagparse(usage)
 
 	Ctxt.Flag_shared = flag_dynlink || flag_shared
@@ -270,15 +270,17 @@ func Main() {
 				// e.g. -d=ssa/generic_cse/time
 				// _ in phase name also matches space
 				phase := name[4:]
-				flag := "debug" // default flag is debug
+				//flag := "debug" // default flag is debug
 				if i := strings.Index(phase, "/"); i >= 0 {
-					flag = phase[i+1:]
+					//flag = phase[i+1:]
 					phase = phase[:i]
 				}
+				/*jea
 				err := ssa.PhaseOption(phase, flag, val)
 				if err != "" {
 					log.Fatalf(err)
 				}
+				*/
 				continue Split
 			}
 			log.Fatalf("unknown debug key -d %s\n", name)
@@ -305,7 +307,7 @@ func Main() {
 	nerrors = 0
 	lexlineno = 1
 
-	loadsys()
+	//jea loadsys()
 
 	for _, infile = range flag.Args() {
 		if trace && Debug['x'] != 0 {
@@ -393,111 +395,112 @@ func Main() {
 			}
 		}
 	}
-
-	// Phase 4: Decide how to capture closed variables.
-	// This needs to run before escape analysis,
-	// because variables captured by value do not escape.
-	for _, n := range xtop {
-		if n.Op == ODCLFUNC && n.Func.Closure != nil {
-			Curfn = n
-			capturevars(n)
-		}
-	}
-
-	Curfn = nil
-
-	if nsavederrors+nerrors != 0 {
-		errorexit()
-	}
-
-	// Phase 5: Inlining
-	if Debug['l'] > 1 {
-		// Typecheck imported function bodies if debug['l'] > 1,
-		// otherwise lazily when used or re-exported.
-		for _, n := range importlist {
-			if n.Func.Inl.Len() != 0 {
-				saveerrors()
-				typecheckinl(n)
+	/*
+		// Phase 4: Decide how to capture closed variables.
+		// This needs to run before escape analysis,
+		// because variables captured by value do not escape.
+		for _, n := range xtop {
+			if n.Op == ODCLFUNC && n.Func.Closure != nil {
+				Curfn = n
+				capturevars(n)
 			}
 		}
+
+		Curfn = nil
 
 		if nsavederrors+nerrors != 0 {
 			errorexit()
 		}
-	}
 
-	if Debug['l'] != 0 {
-		// Find functions that can be inlined and clone them before walk expands them.
-		visitBottomUp(xtop, func(list []*Node, recursive bool) {
-			for _, n := range list {
-				if n.Op == ODCLFUNC {
-					caninl(n)
-					inlcalls(n)
+		// Phase 5: Inlining
+		if Debug['l'] > 1 {
+			// Typecheck imported function bodies if debug['l'] > 1,
+			// otherwise lazily when used or re-exported.
+			for _, n := range importlist {
+				if n.Func.Inl.Len() != 0 {
+					saveerrors()
+					typecheckinl(n)
 				}
 			}
-		})
-	}
 
-	// Phase 6: Escape analysis.
-	// Required for moving heap allocations onto stack,
-	// which in turn is required by the closure implementation,
-	// which stores the addresses of stack variables into the closure.
-	// If the closure does not escape, it needs to be on the stack
-	// or else the stack copier will not update it.
-	// Large values are also moved off stack in escape analysis;
-	// because large values may contain pointers, it must happen early.
-	escapes(xtop)
-
-	// Phase 7: Transform closure bodies to properly reference captured variables.
-	// This needs to happen before walk, because closures must be transformed
-	// before walk reaches a call of a closure.
-	for _, n := range xtop {
-		if n.Op == ODCLFUNC && n.Func.Closure != nil {
-			Curfn = n
-			transformclosure(n)
+			if nsavederrors+nerrors != 0 {
+				errorexit()
+			}
 		}
-	}
 
-	Curfn = nil
-
-	// Phase 8: Compile top level functions.
-	// Don't use range--walk can add functions to xtop.
-	for i := 0; i < len(xtop); i++ {
-		if xtop[i].Op == ODCLFUNC {
-			funccompile(xtop[i])
+		if Debug['l'] != 0 {
+			// Find functions that can be inlined and clone them before walk expands them.
+			visitBottomUp(xtop, func(list []*Node, recursive bool) {
+				for _, n := range list {
+					if n.Op == ODCLFUNC {
+						caninl(n)
+						inlcalls(n)
+					}
+				}
+			})
 		}
-	}
 
-	if nsavederrors+nerrors == 0 {
-		fninit(xtop)
-	}
+		// Phase 6: Escape analysis.
+		// Required for moving heap allocations onto stack,
+		// which in turn is required by the closure implementation,
+		// which stores the addresses of stack variables into the closure.
+		// If the closure does not escape, it needs to be on the stack
+		// or else the stack copier will not update it.
+		// Large values are also moved off stack in escape analysis;
+		// because large values may contain pointers, it must happen early.
+		escapes(xtop)
 
-	if compiling_runtime {
-		checknowritebarrierrec()
-	}
-
-	// Phase 9: Check external declarations.
-	for i, n := range externdcl {
-		if n.Op == ONAME {
-			externdcl[i] = typecheck(externdcl[i], Erv)
+		// Phase 7: Transform closure bodies to properly reference captured variables.
+		// This needs to happen before walk, because closures must be transformed
+		// before walk reaches a call of a closure.
+		for _, n := range xtop {
+			if n.Op == ODCLFUNC && n.Func.Closure != nil {
+				Curfn = n
+				transformclosure(n)
+			}
 		}
-	}
 
-	if nerrors+nsavederrors != 0 {
-		errorexit()
-	}
+		Curfn = nil
 
-	dumpobj()
+		// Phase 8: Compile top level functions.
+		// Don't use range--walk can add functions to xtop.
+		for i := 0; i < len(xtop); i++ {
+			if xtop[i].Op == ODCLFUNC {
+				funccompile(xtop[i])
+			}
+		}
 
-	if asmhdr != "" {
-		dumpasmhdr()
-	}
+		if nsavederrors+nerrors == 0 {
+			fninit(xtop)
+		}
 
-	if nerrors+nsavederrors != 0 {
-		errorexit()
-	}
+		if compiling_runtime {
+			checknowritebarrierrec()
+		}
 
-	Flusherrors()
+		// Phase 9: Check external declarations.
+		for i, n := range externdcl {
+			if n.Op == ONAME {
+				externdcl[i] = typecheck(externdcl[i], Erv)
+			}
+		}
+
+		if nerrors+nsavederrors != 0 {
+			errorexit()
+		}
+
+		dumpobj()
+
+		if asmhdr != "" {
+			dumpasmhdr()
+		}
+
+		if nerrors+nsavederrors != 0 {
+			errorexit()
+		}
+
+		Flusherrors()
+	*/
 }
 
 var importMap = map[string]string{}
@@ -634,6 +637,7 @@ func findpkg(name string) (file string, ok bool) {
 	return "", false
 }
 
+/*
 // loadsys loads the definitions for the low-level runtime and unsafe functions,
 // so that the compiler can generate calls to them,
 // but does not make the names "runtime" or "unsafe" visible as packages.
@@ -668,7 +672,7 @@ func loadsys() {
 	importpkg = nil
 	incannedimport = 0
 }
-
+*/
 func importfile(f *Val, indent []byte) {
 	if importpkg != nil {
 		Fatalf("importpkg not nil")
@@ -840,7 +844,7 @@ func importfile(f *Val, indent []byte) {
 			fmt.Printf("importing %s (%s)\n", path_, file)
 		}
 		imp.ReadByte() // skip \n after $$B
-		Import(imp)
+		//jea Import(imp)
 
 	default:
 		Yyerror("no import in %q", path_)
