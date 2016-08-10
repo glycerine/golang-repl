@@ -1349,104 +1349,6 @@ ok:
 	return s
 }
 
-/*func dumptypestructs() {
-	// copy types from externdcl list to signatlist
-	for _, n := range externdcl {
-		if n.Op != OTYPE {
-			continue
-		}
-		signatlist = append(signatlist, n)
-	}
-
-	// Process signatlist.  This can't use range, as entries are
-	// added to the list while it is being processed.
-	for i := 0; i < len(signatlist); i++ {
-		n := signatlist[i]
-		if n.Op != OTYPE {
-			continue
-		}
-		t := n.Type
-		dtypesym(t)
-		if t.Sym != nil {
-			dtypesym(Ptrto(t))
-		}
-	}
-
-	// process itabs
-	for _, i := range itabs {
-		// dump empty itab symbol into i.sym
-		// type itab struct {
-		//   inter  *interfacetype
-		//   _type  *_type
-		//   link   *itab
-		//   bad    int32
-		//   unused int32
-		//   fun    [1]uintptr // variable sized
-		// }
-		o := dsymptr(i.sym, 0, dtypesym(i.itype), 0)
-		o = dsymptr(i.sym, o, dtypesym(i.t), 0)
-		o += Widthptr + 8                      // skip link/bad/unused fields
-		o += len(imethods(i.itype)) * Widthptr // skip fun method pointers
-		// at runtime the itab will contain pointers to types, other itabs and
-		// method functions. None are allocated on heap, so we can use obj.NOPTR.
-		ggloblsym(i.sym, int32(o), int16(obj.DUPOK|obj.NOPTR))
-
-		ilink := Pkglookup(Tconv(i.t, FmtLeft)+","+Tconv(i.itype, FmtLeft), itablinkpkg)
-		dsymptr(ilink, 0, i.sym, 0)
-		ggloblsym(ilink, int32(Widthptr), int16(obj.DUPOK|obj.RODATA))
-	}
-
-	// generate import strings for imported packages
-	if forceObjFileStability {
-		// Sorting the packages is not necessary but to compare binaries created
-		// using textual and binary format we sort by path to reduce differences.
-		sort.Sort(pkgByPath(pkgs))
-	}
-	for _, p := range pkgs {
-		if p.Direct {
-			dimportpath(p)
-		}
-	}
-
-	// do basic types if compiling package runtime.
-	// they have to be in at least one package,
-	// and runtime is always loaded implicitly,
-	// so this is as good as any.
-	// another possible choice would be package main,
-	// but using runtime means fewer copies in .6 files.
-	if myimportpath == "runtime" {
-		for i := EType(1); i <= TBOOL; i++ {
-			dtypesym(Ptrto(Types[i]))
-		}
-		dtypesym(Ptrto(Types[TSTRING]))
-		dtypesym(Ptrto(Types[TUNSAFEPTR]))
-
-		// emit type structs for error and func(error) string.
-		// The latter is the type of an auto-generated wrapper.
-		dtypesym(Ptrto(errortype))
-
-		dtypesym(functype(nil, []*Node{Nod(ODCLFIELD, nil, typenod(errortype))}, []*Node{Nod(ODCLFIELD, nil, typenod(Types[TSTRING]))}))
-
-		// add paths for runtime and main, which 6l imports implicitly.
-		dimportpath(Runtimepkg)
-
-		if flag_race {
-			dimportpath(racepkg)
-		}
-		if flag_msan {
-			dimportpath(msanpkg)
-		}
-		dimportpath(mkpkg("main"))
-	}
-}
-*/
-/*type pkgByPath []*Pkg
-
-func (a pkgByPath) Len() int           { return len(a) }
-func (a pkgByPath) Less(i, j int) bool { return a[i].Path < a[j].Path }
-func (a pkgByPath) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-*/
-
 func dalgsym(t *Type) *Sym {
 	var s *Sym
 	var hashfunc *Sym
@@ -1580,31 +1482,6 @@ func dgcptrmask(t *Type) *Sym {
 	}
 	return sym
 }
-
-/*jea
-// fillptrmask fills in ptrmask with 1s corresponding to the
-// word offsets in t that hold pointers.
-// ptrmask is assumed to fit at least typeptrdata(t)/Widthptr bits.
-func fillptrmask(t *Type, ptrmask []byte) {
-	for i := range ptrmask {
-		ptrmask[i] = 0
-	}
-	if !haspointers(t) {
-		return
-	}
-
-	vec := bvalloc(8 * int32(len(ptrmask)))
-	xoffset := int64(0)
-	onebitwalktype1(t, &xoffset, vec)
-
-	nptr := typeptrdata(t) / int64(Widthptr)
-	for i := int64(0); i < nptr; i++ {
-		if bvget(vec, int32(i)) == 1 {
-			ptrmask[i/8] |= 1 << (uint(i) % 8)
-		}
-	}
-}
-*/
 
 // dgcprog emits and returns the symbol containing a GC program for type t
 // along with the size of the data described by the program (in the range [typeptrdata(t), t.Width]).

@@ -1917,21 +1917,6 @@ func genwrapper(rcvr *Type, method *Field, newnam *Sym, iface int) {
 	//jea funccompile(fn)
 }
 
-/*func hashmem(t *Type) *Node {
-	sym := Pkglookup("memhash", Runtimepkg)
-
-	n := newname(sym)
-	n.Class = PFUNC
-	tfn := Nod(OTFUNC, nil, nil)
-	tfn.List.Append(Nod(ODCLFIELD, nil, typenod(Ptrto(t))))
-	tfn.List.Append(Nod(ODCLFIELD, nil, typenod(Types[TUINTPTR])))
-	tfn.List.Append(Nod(ODCLFIELD, nil, typenod(Types[TUINTPTR])))
-	tfn.Rlist.Append(Nod(ODCLFIELD, nil, typenod(Types[TUINTPTR])))
-	tfn = typecheck(tfn, Etype)
-	n.Type = tfn.Type
-	return n
-}
-*/
 func ifacelookdot(s *Sym, t *Type, followptr *bool, ignorecase bool) *Field {
 	*followptr = false
 
@@ -2143,13 +2128,6 @@ func tounsigned(t *Type) *Type {
 	return t
 }
 
-/*func ngotype(n *Node) *Sym {
-	if n.Type != nil {
-		return typenamesym(n.Type)
-	}
-	return nil
-}
-*/
 // Convert raw string to the prefix that will be used in the symbol
 // table. All control characters, space, '%' and '"', as well as
 // non-7-bit clean bytes turn into %xx. The period needs escaping

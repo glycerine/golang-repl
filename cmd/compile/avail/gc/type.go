@@ -456,13 +456,6 @@ func typPtr(elem *Type) *Type {
 	return t
 }
 
-// typDDDField returns a new TDDDFIELD type for slice type s.
-/*func typDDDField(s *Type) *Type {
-	t := typ(TDDDFIELD)
-	t.Extra = DDDFieldType{T: s}
-	return t
-}
-*/
 // typChanArgs returns a new TCHANARGS type for channel type c.
 func typChanArgs(c *Type) *Type {
 	t := typ(TCHANARGS)
@@ -951,24 +944,10 @@ func (t *Type) IsEmptyInterface() bool {
 	return t.IsInterface() && t.NumFields() == 0
 }
 
-/*
-func (t *Type) ElemType() ssa.Type {
-	// TODO(josharian): If Type ever moves to a shared
-	// internal package, remove this silly wrapper.
-	return t.Elem()
-}
-func (t *Type) PtrTo() ssa.Type {
-	return Ptrto(t)
-}
-*/
 func (t *Type) NumFields() int {
 	return t.Fields().Len()
 }
 
-/*func (t *Type) FieldType(i int) ssa.Type {
-	return t.Field(i).Type
-}
-*/
 func (t *Type) FieldOff(i int) int64 {
 	return t.Field(i).Offset
 }

@@ -162,79 +162,6 @@ func Clearp(p *obj.Prog) {
 	pcloc++
 }
 
-/*func dumpdata() {
-	ddumped = true
-	if dfirst == nil {
-		return
-	}
-	newplist()
-	*Pc = *dfirst
-	Pc = dpc
-	Clearp(Pc)
-}
-*/
-/*func flushdata() {
-	if dfirst == nil {
-		return
-	}
-	newplist()
-	*Pc = *dfirst
-	Pc = dpc
-	Clearp(Pc)
-	dfirst = nil
-	dpc = nil
-}
-
-// Fixup instructions after allocauto (formerly compactframe) has moved all autos around.
-func fixautoused(p *obj.Prog) {
-	for lp := &p; ; {
-		p = *lp
-		if p == nil {
-			break
-		}
-		if p.As == obj.ATYPE && p.From.Node != nil && p.From.Name == obj.NAME_AUTO && !((p.From.Node).(*Node)).Used {
-			*lp = p.Link
-			continue
-		}
-
-		if (p.As == obj.AVARDEF || p.As == obj.AVARKILL || p.As == obj.AVARLIVE) && p.To.Node != nil && !((p.To.Node).(*Node)).Used {
-			// Cannot remove VARDEF instruction, because - unlike TYPE handled above -
-			// VARDEFs are interspersed with other code, and a jump might be using the
-			// VARDEF as a target. Replace with a no-op instead. A later pass will remove
-			// the no-ops.
-			obj.Nopout(p)
-
-			continue
-		}
-
-		if p.From.Name == obj.NAME_AUTO && p.From.Node != nil {
-			//jea p.From.Offset += stkdelta[p.From.Node.(*Node)]
-		}
-
-		if p.To.Name == obj.NAME_AUTO && p.To.Node != nil {
-			//jea p.To.Offset += stkdelta[p.To.Node.(*Node)]
-		}
-
-		lp = &p.Link
-	}
-}
-*/
-/*func ggloblnod(nam *Node) {
-	p := Thearch.Gins(obj.AGLOBL, nam, nil)
-	p.Lineno = nam.Lineno
-	p.From.Sym.Gotype = Linksym(ngotype(nam))
-	p.To.Sym = nil
-	p.To.Type = obj.TYPE_CONST
-	p.To.Offset = nam.Type.Width
-	p.From3 = new(obj.Addr)
-	if nam.Name.Readonly {
-		p.From3.Offset = obj.RODATA
-	}
-	if nam.Type != nil && !haspointers(nam.Type) {
-		p.From3.Offset |= obj.NOPTR
-	}
-}
-*/
 func ggloblsym(s *Sym, width int32, flags int16) {
 	ggloblLSym(Linksym(s), width, flags)
 }
@@ -253,26 +180,6 @@ func ggloblLSym(s *obj.LSym, width int32, flags int16) {
 	p.From3 = new(obj.Addr)
 	p.From3.Offset = int64(flags)
 }
-
-/*func gjmp(to *obj.Prog) *obj.Prog {
-	p := Gbranch(obj.AJMP, nil, 0)
-	if to != nil {
-		Patch(p, to)
-	}
-	return p
-}
-
-func gtrack(s *Sym) {
-	p := Thearch.Gins(obj.AUSEFIELD, nil, nil)
-	p.From.Type = obj.TYPE_MEM
-	p.From.Name = obj.NAME_EXTERN
-	p.From.Sym = Linksym(s)
-}
-
-func gused(n *Node) {
-	Thearch.Gins(obj.ANOP, n, nil) // used
-}
-*/
 func Isfat(t *Type) bool {
 	if t != nil {
 		switch t.Etype {
@@ -285,23 +192,6 @@ func Isfat(t *Type) bool {
 	return false
 }
 
-// Sweep the prog list to mark any used nodes.
-/*func markautoused(p *obj.Prog) {
-	for ; p != nil; p = p.Link {
-		if p.As == obj.ATYPE || p.As == obj.AVARDEF || p.As == obj.AVARKILL {
-			continue
-		}
-
-		if p.From.Node != nil {
-			((p.From.Node).(*Node)).Used = true
-		}
-
-		if p.To.Node != nil {
-			((p.To.Node).(*Node)).Used = true
-		}
-	}
-}
-*/
 // Naddr rewrites a to refer to n.
 // It assumes that a is zeroed on entry.
 func Naddr(a *obj.Addr, n *Node) {
@@ -505,16 +395,6 @@ func Naddr(a *obj.Addr, n *Node) {
 	}
 }
 
-/*func newplist() *obj.Plist {
-	pl := obj.Linknewplist(Ctxt)
-
-	Pc = Ctxt.NewProg()
-	Clearp(Pc)
-	pl.Firstpc = Pc
-
-	return pl
-}
-*/
 // nodarg returns a Node for the function argument denoted by t,
 // which is either the entire function argument or result struct (t is a  struct *Type)
 // or a specific argument (t is a *Field within a struct *Type).
@@ -641,16 +521,6 @@ func Patch(p *obj.Prog, to *obj.Prog) {
 	p.To.Offset = to.Pc
 }
 
-/*func unpatch(p *obj.Prog) *obj.Prog {
-	if p.To.Type != obj.TYPE_BRANCH {
-		Fatalf("unpatch: not a branch")
-	}
-	q, _ := p.To.Val.(*obj.Prog)
-	p.To.Val = nil
-	p.To.Offset = 0
-	return q
-}
-*/
 var reg [100]int       // count of references to reg
 var regstk [100][]byte // allocation sites, when -v is given
 
@@ -660,50 +530,6 @@ func GetReg(r int) int {
 func SetReg(r, v int) {
 	reg[r-Thearch.REGMIN] = v
 }
-
-/*func ginit() {
-	for r := range reg {
-		reg[r] = 1
-	}
-
-	for r := Thearch.REGMIN; r <= Thearch.REGMAX; r++ {
-		reg[r-Thearch.REGMIN] = 0
-	}
-	for r := Thearch.FREGMIN; r <= Thearch.FREGMAX; r++ {
-		reg[r-Thearch.REGMIN] = 0
-	}
-
-	for _, r := range Thearch.ReservedRegs {
-		reg[r-Thearch.REGMIN] = 1
-	}
-}
-
-func gclean() {
-	for _, r := range Thearch.ReservedRegs {
-		reg[r-Thearch.REGMIN]--
-	}
-
-	for r := Thearch.REGMIN; r <= Thearch.REGMAX; r++ {
-		n := reg[r-Thearch.REGMIN]
-		if n != 0 {
-			if Debug['v'] != 0 {
-				Regdump()
-			}
-			Yyerror("reg %v left allocated", obj.Rconv(r))
-		}
-	}
-
-	for r := Thearch.FREGMIN; r <= Thearch.FREGMAX; r++ {
-		n := reg[r-Thearch.REGMIN]
-		if n != 0 {
-			if Debug['v'] != 0 {
-				Regdump()
-			}
-			Yyerror("reg %v left allocated", obj.Rconv(r))
-		}
-	}
-}
-*/
 
 func Anyregalloc() bool {
 	n := 0

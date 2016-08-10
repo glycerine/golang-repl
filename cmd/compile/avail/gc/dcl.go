@@ -88,21 +88,6 @@ func markdcl() {
 	block = blockgen
 }
 
-/*
-// keep around for debugging
-func dumpdclstack() {
-	i := 0
-	for d := dclstack; d != nil; d = d.Link {
-		fmt.Printf("%6d  %p", i, d)
-		if d.Name != "" {
-			fmt.Printf("  '%s'  %v\n", d.Name, Pkglookup(d.Name, d.Pkg))
-		} else {
-			fmt.Printf("  ---\n")
-		}
-		i++
-	}
-}
-*/
 func testdclstack() {
 	for d := dclstack; d != nil; d = d.Link {
 		if d.Name == "" {
@@ -218,16 +203,6 @@ func declare(n *Node, ctxt Class) {
 	//jea autoexport(n, ctxt)
 }
 
-/*func addvar(n *Node, t *Type, ctxt Class) {
-	if n == nil || n.Sym == nil || (n.Op != ONAME && n.Op != ONONAME) || t == nil {
-		Fatalf("addvar: n=%v t=%v nil", n, t)
-	}
-
-	n.Op = ONAME
-	declare(n, ctxt)
-	n.Type = t
-}
-*/
 // declare variables from grammar
 // new_name_list (type | [type] = expr_list)
 func variter(vl []*Node, t *Node, el []*Node) []*Node {
@@ -1126,14 +1101,6 @@ bad:
 	return nil
 }
 
-/*func methodname(n *Node, t *Type) *Node {
-	s := methodsym(n.Sym, t, 0)
-	if s == nil {
-		return n
-	}
-	return newname(s)
-}
-*/
 func methodname1(n *Node, t *Node) *Node {
 	star := ""
 	if t.Op == OIND {
@@ -1266,43 +1233,6 @@ func addmethod(msym *Sym, t *Type, tpkg *Pkg, local, nointerface bool) {
 	pa.Methods().Append(f)
 }
 
-/*
-func funccompile(n *Node) {
-	Stksize = BADWIDTH
-	Maxarg = 0
-
-	if n.Type == nil {
-		if nerrors == 0 {
-			Fatalf("funccompile missing type")
-		}
-		return
-	}
-
-	// assign parameter offsets
-	checkwidth(n.Type)
-
-	if Curfn != nil {
-		Fatalf("funccompile %v inside %v", n.Func.Nname.Sym, Curfn.Func.Nname.Sym)
-	}
-
-	Stksize = 0
-	dclcontext = PAUTO
-	Funcdepth = n.Func.Depth + 1
-	compile(n)
-	Curfn = nil
-	Pc = nil
-	continpc = nil
-	breakpc = nil
-	Funcdepth = 0
-	dclcontext = PEXTERN
-	if nerrors != 0 {
-		// If we have compile errors, ignore any assembler/linker errors.
-		Ctxt.DiagFunc = func(string, ...interface{}) {}
-	}
-	flushdata()
-	obj.Flushplist(Ctxt) // convert from Prog list to machine code
-}
-*/
 func funcsym(s *Sym) *Sym {
 	if s.Fsym != nil {
 		return s.Fsym
@@ -1327,120 +1257,3 @@ func makefuncsym(s *Sym) {
 	s1.Def.Func.Shortname = newname(s)
 	funcsyms = append(funcsyms, s1.Def)
 }
-
-/*type nowritebarrierrecChecker struct {
-	curfn  *Node
-	stable bool
-
-	// best maps from the ODCLFUNC of each visited function that
-	// recursively invokes a write barrier to the called function
-	// on the shortest path to a write barrier.
-	best map[*Node]nowritebarrierrecCall
-}
-
-type nowritebarrierrecCall struct {
-	target *Node
-	depth  int
-	lineno int32
-}
-
-func checknowritebarrierrec() {
-	c := nowritebarrierrecChecker{
-		best: make(map[*Node]nowritebarrierrecCall),
-	}
-	visitBottomUp(xtop, func(list []*Node, recursive bool) {
-		// Functions with write barriers have depth 0.
-		for _, n := range list {
-			if n.Func.WBLineno != 0 {
-				c.best[n] = nowritebarrierrecCall{target: nil, depth: 0, lineno: n.Func.WBLineno}
-			}
-		}
-
-		// Propagate write barrier depth up from callees. In
-		// the recursive case, we have to update this at most
-		// len(list) times and can stop when we an iteration
-		// that doesn't change anything.
-		for _ = range list {
-			c.stable = false
-			for _, n := range list {
-				if n.Func.WBLineno == 0 {
-					c.curfn = n
-					c.visitcodelist(n.Nbody)
-				}
-			}
-			if c.stable {
-				break
-			}
-		}
-
-		// Check nowritebarrierrec functions.
-		for _, n := range list {
-			if n.Func.Pragma&Nowritebarrierrec == 0 {
-				continue
-			}
-			call, hasWB := c.best[n]
-			if !hasWB {
-				continue
-			}
-
-			// Build the error message in reverse.
-			err := ""
-			for call.target != nil {
-				err = fmt.Sprintf("\n\t%v: called by %v%s", linestr(call.lineno), n.Func.Nname, err)
-				n = call.target
-				call = c.best[n]
-			}
-			err = fmt.Sprintf("write barrier prohibited by caller; %v%s", n.Func.Nname, err)
-			yyerrorl(n.Func.WBLineno, err)
-		}
-	})
-}
-
-func (c *nowritebarrierrecChecker) visitcodelist(l Nodes) {
-	for _, n := range l.Slice() {
-		c.visitcode(n)
-	}
-}
-
-func (c *nowritebarrierrecChecker) visitcode(n *Node) {
-	if n == nil {
-		return
-	}
-
-	if n.Op == OCALLFUNC || n.Op == OCALLMETH {
-		c.visitcall(n)
-	}
-
-	c.visitcodelist(n.Ninit)
-	c.visitcode(n.Left)
-	c.visitcode(n.Right)
-	c.visitcodelist(n.List)
-	c.visitcodelist(n.Nbody)
-	c.visitcodelist(n.Rlist)
-}
-
-func (c *nowritebarrierrecChecker) visitcall(n *Node) {
-	fn := n.Left
-	if n.Op == OCALLMETH {
-		fn = n.Left.Sym.Def
-	}
-	if fn == nil || fn.Op != ONAME || fn.Class != PFUNC || fn.Name.Defn == nil {
-		return
-	}
-	if (compiling_runtime || fn.Sym.Pkg == Runtimepkg) && fn.Sym.Name == "allocm" {
-		return
-	}
-	defn := fn.Name.Defn
-
-	fnbest, ok := c.best[defn]
-	if !ok {
-		return
-	}
-	best, ok := c.best[c.curfn]
-	if ok && fnbest.depth+1 >= best.depth {
-		return
-	}
-	c.best[c.curfn] = nowritebarrierrecCall{target: defn, depth: fnbest.depth + 1, lineno: n.Lineno}
-	c.stable = false
-}
-*/

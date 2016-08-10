@@ -269,12 +269,6 @@ func Main() {
 					//flag = phase[i+1:]
 					phase = phase[:i]
 				}
-				/*jea
-				err := ssa.PhaseOption(phase, flag, val)
-				if err != "" {
-					log.Fatalf(err)
-				}
-				*/
 				continue Split
 			}
 			log.Fatalf("unknown debug key -d %s\n", name)
