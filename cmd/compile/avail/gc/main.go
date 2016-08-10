@@ -207,10 +207,6 @@ func Main() {
 	if Thearch.LinkArch.Family == sys.AMD64 {
 		flag.BoolVar(&flag_largemodel, "largemodel", false, "generate code that assumes a large memory model")
 	}
-	flag.StringVar(&cpuprofile, "cpuprofile", "", "write cpu profile to `file`")
-	flag.StringVar(&memprofile, "memprofile", "", "write memory profile to `file`")
-	flag.Int64Var(&memprofilerate, "memprofilerate", 0, "set runtime.MemProfileRate to `rate`")
-	//flag.BoolVar(&ssaEnabled, "ssa", true, "use SSA backend to generate code")
 	obj.Flagparse(usage)
 
 	Ctxt.Flag_shared = flag_dynlink || flag_shared
@@ -223,8 +219,6 @@ func Main() {
 	if flag.NArg() < 1 {
 		usage()
 	}
-
-	startProfile()
 
 	if flag_race {
 		racepkg = mkpkg("runtime/race")
