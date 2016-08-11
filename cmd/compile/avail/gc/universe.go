@@ -440,7 +440,7 @@ func lexinit1() {
 }
 
 // finishUniverse makes the universe block visible within the current package.
-func finishUniverse() {
+/*func finishUniverse() {
 	// Operationally, this is similar to a dot import of builtinpkg, except
 	// that we silently skip symbols that are already declared in the
 	// package block rather than emitting a redeclared symbol error.
@@ -464,3 +464,4 @@ func finishUniverse() {
 	nodfp.Class = PPARAM
 	nodfp.Sym = Lookup(".fp")
 }
+*/

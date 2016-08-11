@@ -5,9 +5,9 @@
 package amd64
 
 import (
-	"github.com/glycerine/golang-repl/cmd/compile/avail/gc"
 	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"github.com/glycerine/golang-repl/cmd/avail/obj/x86"
+	"github.com/glycerine/golang-repl/cmd/compile/avail/gc"
 )
 
 var (
@@ -34,7 +34,7 @@ func betypeinit() {
 	gc.Thearch.ReservedRegs = resvd
 }
 
-func Main() {
+func InitMain() {
 	gc.Thearch.LinkArch = &x86.Linkamd64
 	if obj.Getgoarch() == "amd64p32" {
 		gc.Thearch.LinkArch = &x86.Linkamd64p32
@@ -89,7 +89,10 @@ func Main() {
 	gc.Thearch.SSAMarkMoves = ssaMarkMoves
 	gc.Thearch.SSAGenValue = ssaGenValue
 	gc.Thearch.SSAGenBlock = ssaGenBlock
+}
 
+func Main() {
+	InitMain()
 	gc.Main()
 	gc.Exit(0)
 }

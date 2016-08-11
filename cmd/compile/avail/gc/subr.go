@@ -1182,7 +1182,7 @@ func Ptrto(t *Type) *Type {
 	return typPtr(t)
 }
 
-func frame(context int) {
+/*func frame(context int) {
 	if context != 0 {
 		fmt.Printf("--- external frame ---\n")
 		for _, n := range externdcl {
@@ -1211,7 +1211,7 @@ func printframenode(n *Node) {
 		fmt.Printf("%v %v width=%d\n", n.Op, n.Type, w)
 	}
 }
-
+*/
 // calculate sethi/ullman number
 // roughly how many registers needed to
 // compile a node. used to compile the

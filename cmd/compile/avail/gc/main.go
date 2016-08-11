@@ -96,9 +96,7 @@ func supportsDynlink(arch *sys.Arch) bool {
 	return arch.InFamily(sys.AMD64, sys.ARM, sys.ARM64, sys.I386, sys.PPC64, sys.S390X)
 }
 
-func Main() {
-	defer hidePanic()
-
+func initMain() {
 	goarch = obj.Getgoarch()
 
 	Ctxt = obj.Linknew(Thearch.LinkArch)
@@ -216,9 +214,11 @@ func Main() {
 	Ctxt.Debugasm = int32(Debug['S'])
 	Ctxt.Debugvlog = int32(Debug['v'])
 
+	/* jea
 	if flag.NArg() < 1 {
 		usage()
 	}
+	*/
 
 	if flag_race {
 		racepkg = mkpkg("runtime/race")
@@ -283,7 +283,7 @@ func Main() {
 		Debug['l'] = 1 - Debug['l']
 	}
 
-	Thearch.Betypeinit()
+	//Thearch.Betypeinit()
 	Widthint = Thearch.LinkArch.IntSize
 	Widthptr = Thearch.LinkArch.PtrSize
 	Widthreg = Thearch.LinkArch.RegSize
@@ -296,7 +296,12 @@ func Main() {
 	lexlineno = 1
 
 	//jea loadsys()
+}
 
+func Main() {
+	defer hidePanic()
+
+	initMain()
 	for _, infile = range flag.Args() {
 		if trace && Debug['x'] != 0 {
 			fmt.Printf("--- %s ---\n", infile)
@@ -334,7 +339,7 @@ func Main() {
 		linehistpop()
 		f.Close()
 	}
-
+	/* jea
 	testdclstack()
 	mkpackage(localpkg.Name) // final import not used checks
 	finishUniverse()
@@ -383,7 +388,7 @@ func Main() {
 			}
 		}
 	}
-	/*
+
 		// Phase 4: Decide how to capture closed variables.
 		// This needs to run before escape analysis,
 		// because variables captured by value do not escape.
@@ -505,11 +510,11 @@ func addImportMap(s string) {
 	importMap[source] = actual
 }
 
-func saveerrors() {
+/*func saveerrors() {
 	nsavederrors += nerrors
 	nerrors = 0
 }
-
+*/
 func arsize(b *bufio.Reader, name string) int {
 	var buf [ArhdrSize]byte
 	if _, err := io.ReadFull(b, buf[:]); err != nil {

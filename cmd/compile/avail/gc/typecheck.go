@@ -3898,7 +3898,7 @@ func (n *Node) isterminating() bool {
 	return false
 }
 
-func checkreturn(fn *Node) {
+/*func checkreturn(fn *Node) {
 	if fn.Type.Results().NumFields() != 0 && fn.Nbody.Len() != 0 {
 		markbreaklist(fn.Nbody, nil)
 		if !fn.Nbody.isterminating() {
@@ -3906,3 +3906,4 @@ func checkreturn(fn *Node) {
 		}
 	}
 }
+*/

@@ -7,8 +7,8 @@ package gc
 import (
 	"bufio"
 	"bytes"
-	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"fmt"
+	"github.com/glycerine/golang-repl/cmd/avail/obj"
 	"io"
 	"strconv"
 	"strings"
